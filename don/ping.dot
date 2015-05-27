@@ -1,0 +1,37 @@
+digraph DON_DON {
+graph [fontsize=10 fontname="Helvetica"];
+node [fontsize=10 fontname="Helvetica"];
+rankdir = TB;
+ranksep = 1;
+concentrate = true;
+compound = true;
+edge [dir=none]
+
+subgraph cluster_DONComputeNode {
+style=filled
+subgraph cluster_ComputeNode {
+ComputeNode [ shape = plaintext, label = <
+<TABLE BORDER="0" CELLBORDER="1" CELLSPACING="5" CELLPADDING="5" BGCOLOR="red">
+<TR>
+<TD COLSPAN="1" BORDER="0" BGCOLOR="yellow" PORT="ComputeNode">Compute Node</TD>
+</TR>
+</TABLE>>];
+
+}
+
+subgraph cluster_Nova {
+style=filled
+subgraph cluster_VMs {
+VMs [ shape = plaintext, label = <
+<TABLE BORDER="0" CELLBORDER="1" CELLSPACING="5" CELLPADDING="5" BGCOLOR="white">
+<TR>
+<TD COLSPAN="7" BORDER="0" BGCOLOR="white" PORT="VMs">VMs</TD>
+</TR>
+<TR>
+<TD ROWSPAN="1" COLSPAN="1" BGCOLOR="#909090">VM1-1</TD>
+<TD ROWSPAN="1" COLSPAN="1" BGCOLOR="#909090">VM1-2</TD>
+<TD ROWSPAN="1" COLSPAN="1" BGCOLOR="#909090">VM3-1</TD>
+<TD ROWSPAN="1" COLSPAN="1" BGCOLOR="#909090">VM3-2</TD>
+<TD ROWSPAN="1" COLSPAN="3" BGCOLOR="#909090">VM4</TD>
+</TR>
+<TR>
