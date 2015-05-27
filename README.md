@@ -4,8 +4,9 @@ Neutron provides Networking-as-a-service in the OpenStack ecosystem. Networking
 functionalities are provided by plugins that implement well-defined Neutron
 APIs. Among many, the Open vSwitch plugin (OVS) is possibly the most widely
 used. Any practical OpenStack installation has complicated networking
-configuration and verifying it manually is time consuming and error prone. We
-demonstrate a completely automated service for verifying and diagnosing the
+configuration and verifying it manually is time consuming and error prone.
+DON, a [django](https://www.djangoproject.com/) app, provides a
+completely automated service for verifying and diagnosing the
 networking functionality provided by OVS. This service verifies (or points out
 deviations) that the user configuration is indeed reflected in the underlying
 infrastructure and presents the results in an intuitive graphical display.
@@ -36,7 +37,8 @@ OpenStack Liberty Summit, we will be moving this to
    don/collector.py to match the settings in the file downloaded in the previous
    step. **This step is soon going to be automated and integrated with the next
    step.**
-3. python manage.py runserver 0.0.0.0:8000. This runs the django server that
+3. DON runs as a  application.
+   `python manage.py runserver 0.0.0.0:8000.` This runs the django server that
    accepts requests on port 8000 from any IP address. For more understanding of
    how to start the django server, please look at official django documentation.
    If you get an error "Error: That port is already in use." and you are sure
