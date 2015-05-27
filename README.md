@@ -1,4 +1,4 @@
-# DON: Diagnosing OpenVswitch Networking
+## DON: Diagnosing OpenVswitch Networking
 
 > [Presented in the OpenStack Liberty Summit held in Vancouver in May, 2015]
 (https://www.openstack.org/summit/vancouver-2015/summit-videos/presentation/don-diagnosing-ovs-in-neutron "DON Presentation at OpenStack Liberty Summit, Vancouver, May 2015").
@@ -46,8 +46,10 @@ OpenStack Liberty Summit, we will be moving this to
    that there is nothing listening on the port, then use `sudo fuser -k 8000/tcp`
    to kill any process that might still be listening on that port.
 
-### TODO:
+### TODO/Known Issues:
 - **Move to [stackforge](https://github.com/stackforge)**
+- Remove hardcoded "cirros" and "cubswin:)" password (default ones used in
+  OpenStack Centos VMs). The user should be prompted for this.
 - integrate with Horizon
 - multi-thread for faster ping test
 - Handle floating ips (br-ex on network node has to be updated)
