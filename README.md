@@ -1,5 +1,8 @@
 # DON: Diagnosing OpenVswitch Networking
 
+> This work was [presented in the OpenStack Liberty Summit held in Vancouver in May, 2015]
+(https://www.openstack.org/summit/vancouver-2015/summit-videos/presentation/don-diagnosing-ovs-in-neutron "DON Presentation at OpenStack Liberty Summit, Vancouver, May 2015").
+
 Neutron provides Networking-as-a-service in the OpenStack ecosystem. Networking
 functionalities are provided by plugins that implement well-defined Neutron
 APIs. Among many, the Open vSwitch plugin (OVS) is possibly the most widely
@@ -10,8 +13,6 @@ completely automated service for verifying and diagnosing the
 networking functionality provided by OVS. This service verifies (or points out
 deviations) that the user configuration is indeed reflected in the underlying
 infrastructure and presents the results in an intuitive graphical display.
-
-This work was [presented in the OpenStack Liberty Summit held in Vancouver in May, 2015](https://www.openstack.org/summit/vancouver-2015/summit-videos/presentation/don-diagnosing-ovs-in-neutron "DON Presentation at OpenStack Liberty Summit, Vancouver, May 2015").
 
 As an example, given the following Neutron network topology:
 ![Neutron: Network Topology](/don/static/net_topology.PNG "Neutron: Network Topology")
