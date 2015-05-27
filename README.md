@@ -10,16 +10,20 @@ networking functionality provided by OVS. This service verifies (or points out
 deviations) that the user configuration is indeed reflected in the underlying
 infrastructure and presents the results in an intuitive graphical display.
 
-This work was [presented in the OpenStack Liberty Summit, May 2015 held in Vancouver](https://www.google.co://www.openstack.org/summit/vancouver-2015/summit-videos/presentation/don-diagnosing-ovs-in-neutron "DON Presentation at OpenStack Liberty Summit, Vancouver, May 2015")
+This work was [presented in the OpenStack Liberty Summit held in Vancouver in May, 2015](https://www.openstack.org/summit/vancouver-2015/summit-videos/presentation/don-diagnosing-ovs-in-neutron "DON Presentation at OpenStack Liberty Summit, Vancouver, May 2015").
 
-## Howto Run:
+![DON: Internal View](/don/static/don_sample.svg "DON: Internal View")
+![DON: Ping Tracer](/don/static/ping_tracer_sample.svg "DON: Ping Tracer")
 
-0. [Download and source the project specific rc file](http://docs.openstack.org/user-guide/common/cli_set_environment_variables_using_openstack_rc.html)
-1. python collector.py - this generates don.json. Update the `myenv` dictionary in
+## How to Run:
+
+0. You must have a [devstack setup running on a single VM](http://docs.openstack.org/developer/devstack/guides/single-vm.html).
+1. [Download and source the project specific rc file](http://docs.openstack.org/user-guide/common/cli_set_environment_variables_using_openstack_rc.html).
+2. `cd don; python collector.py` - this generates don.json. Update the `myenv` dictionary in
    don/collector.py to match the settings in the file downloaded in the previous
    step. **This step is soon going to be automated and integrated with the next
    step.**
-2. python manage.py runserver 0.0.0.0:8000. This runs the django server that
+3. python manage.py runserver 0.0.0.0:8000. This runs the django server that
    accepts requests on port 8000 from any ip address. For more understanding of
    how to start the django server, please look at official django documentation.
    If you get an error "Error: That port is already in use." and you are sure
@@ -27,6 +31,7 @@ This work was [presented in the OpenStack Liberty Summit, May 2015 held in Vanco
    to kill any process that might still be listening on that port.
 
 ### TODO:
+- Move to [stackforge](https://github.com/stackforge)
 - integrate with Horizon
 - multi-thread for faster ping test
 - Handle floating ips (br-ex on network node has to be updated)
@@ -55,4 +60,10 @@ This work was [presented in the OpenStack Liberty Summit, May 2015 held in Vanco
 - ~~Get network name (private0, private1, ...) for each port~~
 - ~~Color code the vlans. same color for the same vlan tag.~~
 - ~~Get VLAN tags for br-int~~
+
+## Issues/Comments:
+If you have questions, bugs, or feature requests, file an issue or send email
+to:
+
+* Amit Saha (amisaha+don@cisco.com)
 
