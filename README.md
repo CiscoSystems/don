@@ -12,8 +12,14 @@ infrastructure and presents the results in an intuitive graphical display.
 
 This work was [presented in the OpenStack Liberty Summit held in Vancouver in May, 2015](https://www.openstack.org/summit/vancouver-2015/summit-videos/presentation/don-diagnosing-ovs-in-neutron "DON Presentation at OpenStack Liberty Summit, Vancouver, May 2015").
 
-![DON: Internal View](/don/static/don_sample.svg "DON: Internal View")
-![DON: Ping Tracer](/don/static/ping_tracer_sample.svg "DON: Ping Tracer")
+As an example, given the following Neutron network topology:
+![Neutron: Network Topology](/don/static/net_topology.PNG "Neutron: Network Topology")
+
+DON generates the following view of the networking internals:
+![DON: Internal View](/don/static/don_internal.PNG "DON: Internal View")
+
+and also allows the user to do ping tracing:
+![DON: Ping Tracer](/don/static/don_ping_notworking.PNG "DON: Ping Tracer")
 
 ## How to Run:
 
@@ -31,7 +37,7 @@ This work was [presented in the OpenStack Liberty Summit held in Vancouver in Ma
    to kill any process that might still be listening on that port.
 
 ### TODO:
-- Move to [stackforge](https://github.com/stackforge)
+- **Move to [stackforge](https://github.com/stackforge)**
 - integrate with Horizon
 - multi-thread for faster ping test
 - Handle floating ips (br-ex on network node has to be updated)
