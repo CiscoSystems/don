@@ -15,11 +15,18 @@ This work was [presented in the OpenStack Liberty Summit held in Vancouver in Ma
 As an example, given the following Neutron network topology:
 ![Neutron: Network Topology](/don/static/net_topology.PNG "Neutron: Network Topology")
 
-DON generates the following view of the networking internals:
+DON generates the following view of the networking internals,
 ![DON: Internal View](/don/static/don_internal.PNG "DON: Internal View")
 
-and also allows the user to do ping tracing:
+does OVS tests and ping tests,
+![DON: Analysis](/don/static/don_analysis.PNG "DON: Analysis")
+
+and also allows the user to do ping tracing
 ![DON: Ping Tracer](/don/static/don_ping_notworking.PNG "DON: Ping Tracer")
+
+The project is in beta status and owing to overwhelming response at the
+OpenStack Liberty Summit, we will be moving this to
+[stackforge](https://github.com/stackforge) sometime soon.
 
 ## How to Run:
 
@@ -30,7 +37,7 @@ and also allows the user to do ping tracing:
    step. **This step is soon going to be automated and integrated with the next
    step.**
 3. python manage.py runserver 0.0.0.0:8000. This runs the django server that
-   accepts requests on port 8000 from any ip address. For more understanding of
+   accepts requests on port 8000 from any IP address. For more understanding of
    how to start the django server, please look at official django documentation.
    If you get an error "Error: That port is already in use." and you are sure
    that there is nothing listening on the port, then use `sudo fuser -k 8000/tcp`
@@ -49,23 +56,6 @@ and also allows the user to do ping tracing:
   are no edges
 - Clickable SVG (to get more detail). Will need javascript.
 - Multi node setup
-
-## DONE:
-- ~~ping with tcpdump for vms attached to different network - visualize~~
-- ~~ping with tcpdump for vms attached to same network - visualize~~
-- ~~Anomalies to be displayed~~
-- ~~display ping and ovs-appctl results~~
-- ~~ovs-appctl commands~~
-- ~~ping test~~
-- ~~Plot the port ids (makes it easier to debug)~~
-- ~~Combine compute and network figures~~
-- ~~Collect network node related commands~~
-- ~~Draw network node~~
-- ~~Draw compute node~~
-- ~~Get IP of each interface~~
-- ~~Get network name (private0, private1, ...) for each port~~
-- ~~Color code the vlans. same color for the same vlan tag.~~
-- ~~Get VLAN tags for br-int~~
 
 ## Issues/Comments:
 If you have questions, bugs, or feature requests, file an issue or send email
