@@ -1,6 +1,6 @@
 ## DON: Diagnosing OVS in Neutron
 
-> [Presented in the OpenStack Liberty Summit held in Vancouver in May, 2015]
+> [Presented in the OpenStack Liberty Summit, Vancouver, May, 2015]
 (https://www.openstack.org/summit/vancouver-2015/summit-videos/presentation/don-diagnosing-ovs-in-neutron "DON Presentation at OpenStack Liberty Summit, Vancouver, May 2015").
 
 Neutron provides Networking-as-a-service in the OpenStack ecosystem. Networking
