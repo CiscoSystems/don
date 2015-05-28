@@ -1,4 +1,4 @@
-## DON: Diagnosing OpenVswitch Networking
+## DON: Diagnosing OVS in Neutron
 
 > [Presented in the OpenStack Liberty Summit held in Vancouver in May, 2015]
 (https://www.openstack.org/summit/vancouver-2015/summit-videos/presentation/don-diagnosing-ovs-in-neutron "DON Presentation at OpenStack Liberty Summit, Vancouver, May 2015").
@@ -38,9 +38,8 @@ OpenStack Liberty Summit, we will be moving this to
    don/collector.py to match the settings in the file downloaded in the previous
    step. **This step is soon going to be automated and integrated with the next
    step.**
-3. DON runs as a  application.
-   `python manage.py runserver 0.0.0.0:8000.` This runs the django server that
-   accepts requests on port 8000 from any IP address. For more understanding of
+3. `python manage.py runserver 0.0.0.0:8000.` This runs the django server that
+   accepts requests on port 8000 from any IP address. For a better understanding of
    how to start the django server, please look at official django documentation.
    If you get an error "Error: That port is already in use." and you are sure
    that there is nothing listening on the port, then use `sudo fuser -k 8000/tcp`
@@ -49,11 +48,12 @@ OpenStack Liberty Summit, we will be moving this to
 ### TODO/Known Issues:
 - **Move to [stackforge](https://github.com/stackforge)**
 - Remove hardcoded "cirros" and "cubswin:)" password (default ones used in
-  OpenStack Centos VMs). The user should be prompted for this.
+  OpenStack Cirros VMs). Ideally, the user should be prompted for this or a
+  config file should have this.
 - integrate with Horizon
 - multi-thread for faster ping test
 - Handle floating ips (br-ex on network node has to be updated)
-- add legend
+- add legend - low priority
 - figure out public network (since it does not have qdhcp associated with it)
 - admin-openrc.sh file as input
 - Get eth0/eth1 of each interface
