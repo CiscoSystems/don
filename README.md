@@ -61,6 +61,21 @@ OpenStack Liberty Summit, we will be moving this to
   are no edges
 - Clickable SVG (to get more detail). Will need javascript.
 - Multi node setup
+- ~~ping with tcpdump for vms attached to different network - visualize~~
+- ~~ping with tcpdump for vms attached to same network - visualize~~
+- ~~Anomalies to be displayed~~
+- ~~display ping and ovs-appctl results~~
+- ~~ovs-appctl commands~~
+- ~~ping test~~
+- ~~Plot the port ids (makes it easier to debug)~~
+- ~~Combine compute and network figures~~
+- ~~Collect network node related commands~~
+- ~~Draw network node~~
+- ~~Draw compute node~~
+- ~~Get IP of each interface~~
+- ~~Get network name (private0, private1, ...) for each port~~
+- ~~Color code the vlans. same color for the same vlan tag.~~
+- ~~Get VLAN tags for br-int~~
 
 ## Issues/Comments:
 If you have questions, bugs, or feature requests, file an issue or send email
