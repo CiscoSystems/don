@@ -8,7 +8,8 @@ functionalities are provided by plugins that implement well-defined Neutron
 APIs. Among many, the Open vSwitch plugin (OVS) is possibly the most widely
 used. Any practical OpenStack installation has complicated networking
 configuration and verifying it manually is time consuming and error prone.
-DON, a [django](https://www.djangoproject.com/) app, provides a
+DON, written in [django](https://www.djangoproject.com/), is a network analysis
+and diagnostic system and provides a
 completely automated service for verifying and diagnosing the
 networking functionality provided by OVS. This service verifies (or points out
 deviations) that the user configuration is indeed reflected in the underlying
