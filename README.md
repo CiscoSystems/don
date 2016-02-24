@@ -47,41 +47,10 @@ OpenStack Liberty Summit, we will be moving this to
    to kill any process that might still be listening on that port.
 
 ### TODO/Known Issues:
-- **Move to [stackforge](https://github.com/stackforge)**
-- Remove hardcoded "cirros" and "cubswin:)" password (default ones used in
-  OpenStack Cirros VMs). Ideally, the user should be prompted for this or a
-  config file should have this.
-- integrate with Horizon
-- multi-thread for faster ping test
-- Handle floating ips (br-ex on network node has to be updated)
-- add legend - low priority
-- figure out public network (since it does not have qdhcp associated with it)
-- admin-openrc.sh file as input
-- Get eth0/eth1 of each interface
-- Invisible edges - to make figure have similar ordering of nodes even if there
-  are no edges
-- Clickable SVG (to get more detail). Will need javascript.
-- Multi node setup
-- ~~ping with tcpdump for vms attached to different network - visualize~~
-- ~~ping with tcpdump for vms attached to same network - visualize~~
-- ~~Anomalies to be displayed~~
-- ~~display ping and ovs-appctl results~~
-- ~~ovs-appctl commands~~
-- ~~ping test~~
-- ~~Plot the port ids (makes it easier to debug)~~
-- ~~Combine compute and network figures~~
-- ~~Collect network node related commands~~
-- ~~Draw network node~~
-- ~~Draw compute node~~
-- ~~Get IP of each interface~~
-- ~~Get network name (private0, private1, ...) for each port~~
-- ~~Color code the vlans. same color for the same vlan tag.~~
-- ~~Get VLAN tags for br-int~~
+Please look at issues in the github repo.
 
 ## Issues/Comments:
 If you have questions, bugs, or feature requests, file an issue or send email
 to:
 
 * Amit Saha (amisaha+don@cisco.com)
-* Pritesh Kothari (pritkoth+don@cisco.com)
-
