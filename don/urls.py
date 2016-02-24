@@ -1,12 +1,11 @@
-from django.conf.urls import url
-from django.views.generic import RedirectView
+from django.conf.urls import patterns, include, url
+from django.contrib import admin
 
-from . import views
+urlpatterns = patterns('',
+    # Examples:
+    # url(r'^$', 'Don.views.home', name='home'),
+    # url(r'^blog/', include('blog.urls')),
 
-urlpatterns = [
-    url(r'^$', RedirectView.as_view(url='/static/don.html')),
-    url(r'^test/$', views.test, name='test'),
-    url(r'^view/$', views.view, name='view'),
-    url(r'^analyze/$', views.analyze, name='analyze'),
-    url(r'^ping/$', views.ping, name='ping'),
-]
+    url(r'^don/', include('don.urls')),
+    url(r'^admin/', include(admin.site.urls)),
+)
