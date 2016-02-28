@@ -33,6 +33,12 @@ OpenStack Liberty Summit, we will be moving this to
 
 ## How to Run:
 
+### Prerequisites:
+
+* Django version must be 1.7 or later.
+
+### Steps:
+
 0. You must have a [devstack setup running on a single VM](http://docs.openstack.org/developer/devstack/guides/single-vm.html).
 1. [Download and source the project specific rc file](http://docs.openstack.org/user-guide/common/cli_set_environment_variables_using_openstack_rc.html).
 2. `cd don; python collector.py` - this generates don.json. Update the `myenv` dictionary in
