@@ -12,14 +12,20 @@ from common import settings, debug, error, status_update, dump_json, load_json
 from common import execute_cmd
 from analyzer import analyze
 
-# TODO Generate this automatically from admin-openrc.sh
-myenv = dict(os.environ.copy(), OS_PASSWORD="admin",
-                              OS_USER_NAME="admin",
-                              OS_TENANT_NAME="admin",
-                              OS_PROJECT_NAME="admin",
-                              OS_TENANT_ID="9018c3a08bc0436ab3491701701fd81a",
-                              OS_AUTH_URL="http://10.0.2.15:5000/v2.0",
-                              OS_REGION_NAME="RegionOne")
+def get_env(filename):
+    lines=open(os.getcwd()+os.sep+filename,'r').read().splitlines()
+    env = {}
+    for line in lines:
+        if line.startswith('export'):
+            m = re.search(r'export (.+)=(.+)', line)
+            if m:
+                key = m.group(1).replace('"','')
+                val = m.group(2).replace('"','')
+                env.update({key:val})
+    return env
+
+myenv = os.environ.copy()
+myenv.update(get_env('admin-openrc.sh'))
 
 # Contains all info gathered by parsing the output of commands
 info = {
