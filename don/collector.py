@@ -13,7 +13,11 @@ from common import execute_cmd
 from analyzer import analyze
 
 def get_env(filename):
-    lines=open(os.getcwd()+os.sep+filename,'r').read().splitlines()
+    try:
+        lines=open(os.getcwd()+os.sep+filename,'r').read().splitlines()
+    except IOError,e:
+        print "%s :%s"%(e.args[1],filename)
+        raise
     env = {}
     for line in lines:
         if line.startswith('export'):

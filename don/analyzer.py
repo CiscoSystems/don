@@ -136,9 +136,9 @@ def get_vm_credentials(config_file='credentials.yaml'):
     try:
         with open(config_file,'r') as s:
             return yaml.safe_load(s)
-    except Exception,e:
-        pprint.pprint(e)
-        return {}
+    except IOError,e:
+        print '%s :%s'%(e.args[1],config_file)
+        raise
 
 def test_ping (info):
     debug('Running ping test')
