@@ -16,9 +16,7 @@ from itertools import combinations
 
 from common import settings, debug, error, status_update, get_router
 from common import dump_json, load_json, get_subnet, is_network_public
-
-username='cirros'
-passwd='cubswin:)'
+import yaml
 
 tick    = '&#10004;'
 cross   = '&#10008;'
@@ -134,9 +132,18 @@ def print_ping_result(cmds, overall_result, info, comment=None):
     lines.append('OVERALL RESULT: %s\n' % overall_str)
     return lines
 
+def get_vm_credentials(config_file='credentials.yaml'):
+    try:
+        with open(config_file,'r') as s:
+            return yaml.safe_load(s)
+    except IOError,e:
+        print '%s :%s'%(e.args[1],config_file)
+        raise
+
 def test_ping (info):
     debug('Running ping test')
     vms = info['vms']
+    vm_credentials = get_vm_credentials()
     for vm in sorted(vms.keys()):
         vms[vm]['qrouter'] = get_vm_qrouters(info, vm)
 
@@ -155,6 +162,8 @@ def test_ping (info):
                 for dst_ip in vms[dst_vm]['interfaces'].keys():
                     if is_network_public(dst_ip, dst_vm, info):
                         continue
+                    username = vm_credentials.get(src_vm, vm_credentials['default'])['username']
+                    passwd = vm_credentials.get(src_vm, vm_credentials['default'])['password']
                     cmd = 'sudo ip netns exec ' + qrouter
                     cmd += ' python ping.py --src_ip %s --dst_ip %s --username "%s" --passwd "%s" --count %d --timeout %d' % \
                             (src_ip, dst_ip, username, passwd, 1, 2)
@@ -327,6 +336,7 @@ def analyze (json_filename, params):
             for line in test_suite[test]['html']:
                 f.write(line)
     report_file_close(f)
+    os.chdir(BASE_DIR)
 
 def check_args():
     parser = argparse.ArgumentParser(description='Static analysis of output of commands',

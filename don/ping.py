@@ -47,7 +47,8 @@ def ping_test (src_ip, dst_ip, username, passwd, count, timeout):
         cmd_dict['cmd'] = cmd
         cmd_dict['output'] = output
         for line in output:
-            m = re.search('(\d+) packets transmitted, (\d+) packets received', line)
+            m = re.search('(\d+) packets transmitted, (\d+) packets received', line) or \
+                re.search('(\d+) packets transmitted, (\d+) received', line) # also handles cirros vm ping response
             if m:
                 tx_pkts = float(m.group(1))
                 rx_pkts = float(m.group(2))
