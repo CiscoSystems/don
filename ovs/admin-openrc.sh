@@ -16,7 +16,7 @@ export OS_AUTH_URL=http://10.0.2.15:5000/v2.0
 
 # With the addition of Keystone we have standardized on the term **tenant**
 # as the entity that owns the resources.
-export OS_TENANT_ID=e36a9e4558ee4ac18dafc522b6289318
+export OS_TENANT_ID=5e40d18284c34e0fb9cdb6f92f651f71
 export OS_TENANT_NAME="admin"
 export OS_PROJECT_NAME="admin"
 
@@ -28,7 +28,7 @@ export OS_USERNAME="admin"
 #echo "Please enter your OpenStack Password: "
 #read -sr OS_PASSWORD_INPUT
 #export OS_PASSWORD=$OS_PASSWORD_INPUT
-export OS_PASSWORD="admin"
+export OS_PASSWORD="password"
 
 # If your configuration has multiple regions, we set that information here.
 # OS_REGION_NAME is optional and only valid in certain environments.

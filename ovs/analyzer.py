@@ -309,7 +309,7 @@ def analyze (json_filename, params):
     settings['debug']               = True
     BASE_DIR = os.path.dirname(os.path.dirname(__file__))
     CUR_DIR = os.getcwd()
-    os.chdir(CUR_DIR + '/don')
+    os.chdir(CUR_DIR + '/ovs')
     NEW_DIR = os.getcwd()
     #return BASE_DIR + ':' + CUR_DIR + ':' + NEW_DIR
     debug('This is what I am going to analyze')
