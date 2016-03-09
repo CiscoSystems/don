@@ -16,13 +16,13 @@ def index(request):
 
 def view(request):
     pwd = settings.BASE_DIR
-    JSON_FILE = pwd + '/don/don.json'
-    COMPUTE_DOT_FILE = pwd + '/don/static/compute.dot'
-    COMPUTE_SVG_FILE = pwd + '/don/static/compute.svg'
-    NETWORK_DOT_FILE = pwd + '/don/static/network.dot'
-    NETWORK_SVG_FILE = pwd + '/don/static/network.svg'
-    COMBINED_DOT_FILE = pwd + '/don/static/don.dot'
-    COMBINED_SVG_FILE = pwd + '/don/static/don.svg'
+    JSON_FILE = pwd + '/ovs/don.json'
+    COMPUTE_DOT_FILE = pwd + '/ovs/static/compute.dot'
+    COMPUTE_SVG_FILE = pwd + '/ovs/static/compute.svg'
+    NETWORK_DOT_FILE = pwd + '/ovs/static/network.dot'
+    NETWORK_SVG_FILE = pwd + '/ovs/static/network.svg'
+    COMBINED_DOT_FILE = pwd + '/ovs/static/don.dot'
+    COMBINED_SVG_FILE = pwd + '/ovs/static/don.svg'
 
     plotter = DotGenerator(JSON_FILE,
                            COMPUTE_DOT_FILE,
@@ -46,15 +46,15 @@ def view(request):
 
 def analyze(request):
     pwd = settings.BASE_DIR
-    JSON_FILE = pwd + '/don/don.json'
+    JSON_FILE = pwd + '/ovs/don.json'
 
     params = {
-            'error_file'        : pwd + '/don/static/don.error.txt',
+            'error_file'        : pwd + '/ovs/static/don.error.txt',
             'test:all'          : True,
             'test:ping'         : False,
             'test:ping_count'   : 1,
             'test:ovs'          : True,
-            'test:report_file'  : pwd + '/don/static/don.report.html',
+            'test:report_file'  : pwd + '/ovs/static/don.report.html',
             }
 
     analyzer.analyze(JSON_FILE, params)
@@ -83,14 +83,14 @@ def ping(request):
             #return HttpResponse(html)
 
             pwd = settings.BASE_DIR
-            JSON_FILE = pwd + '/don/don.json'
+            JSON_FILE = pwd + '/ovs/don.json'
 
             params = {
-                    'json_file' : pwd + '/don/don.json',
+                    'json_file' : pwd + '/ovs/don.json',
                     'src_ip'    : src_ip,
                     'dst_ip'    : dst_ip,
                     'router'    : router,
-                    'path_file' : pwd + '/don/static/ping.html',
+                    'path_file' : pwd + '/ovs/static/ping.html',
                     'username'  : 'cirros',
                     'passwd'    : 'cubswin:)',
                     'count'     : 2,
@@ -100,14 +100,14 @@ def ping(request):
                     }
             path.path(params)
 
-            JSON_FILE = pwd + '/don/don.json'
+            JSON_FILE = pwd + '/ovs/don.json'
             COMPUTE_DOT_FILE  = None
             COMPUTE_SVG_FILE  = None
             NETWORK_DOT_FILE  = None
             NETWORK_SVG_FILE  = None
-            COMBINED_DOT_FILE = pwd + '/don/static/ping.dot'
-            COMBINED_SVG_FILE = pwd + '/don/static/ping.svg'
-            HIGHLIGHT_FILE    = pwd + '/don/static/ping.html'
+            COMBINED_DOT_FILE = pwd + '/ovs/static/ping.dot'
+            COMBINED_SVG_FILE = pwd + '/ovs/static/ping.svg'
+            HIGHLIGHT_FILE    = pwd + '/ovs/static/ping.html'
 
             plotter = DotGenerator(JSON_FILE,
                                    COMPUTE_DOT_FILE,

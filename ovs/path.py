@@ -61,7 +61,7 @@ def qrouter_usable(qrouter, src_ip, dst_ip, username, passwd):
 
 
 def launch_ping(src_ip, dst_ip, username, passwd, count, timeout, qrouter, filename):
-    cmd = 'sudo ip netns exec ' + qrouter
+    cmd = 'sudo ip netns exec ' + str(qrouter)
     cmd += ' python ping.py --src_ip %s --dst_ip %s --username "%s" --passwd "%s" --count %d --timeout %d' % \
             (src_ip, dst_ip, username, passwd, count, timeout)
     cmd += ' > %s 2>&1' % filename
@@ -403,7 +403,7 @@ def path (params):
     BASE_DIR = os.path.dirname(os.path.dirname(__file__))
     CUR_DIR = os.getcwd()
     if not re.search('don/Don/don', CUR_DIR):
-        os.chdir(CUR_DIR + '/don')
+        os.chdir(CUR_DIR + '/ovs')
     NEW_DIR = os.getcwd()
     debug(BASE_DIR + ':' + CUR_DIR + ':' + NEW_DIR)
 
