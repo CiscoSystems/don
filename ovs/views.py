@@ -136,7 +136,6 @@ def collect(request):
     CUR_DIR = os.getcwd()
     os.chdir(CUR_DIR + '/ovs')
     cmd = 'sudo python collector.py'
-    res = subprocess.call(cmd,shell=True)
     ps = subprocess.Popen('sudo python collector.py',shell=True,stdout=subprocess.PIPE,stderr=subprocess.STDOUT)
     for line in iter(ps.stdout.readline, ''):
         if line.startswith('STATUS:') and line.find('Writing collected info'):
