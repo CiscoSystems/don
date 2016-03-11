@@ -3,7 +3,7 @@ from django.http import HttpResponse, HttpResponseRedirect
 from django.conf import settings
 import os
 from .forms import PingForm
-
+import subprocess
 
 from plot import DotGenerator
 import analyzer
@@ -129,3 +129,19 @@ def ping(request):
 
     return render(request, 'ping.html', {'form': form})
 
+def collect(request):
+    macro = {'collect_status':'Collecting failed'}
+    
+    BASE_DIR = os.path.dirname(os.path.dirname(__file__))
+    CUR_DIR = os.getcwd()
+    os.chdir(CUR_DIR + '/ovs')
+    cmd = 'sudo python collector.py'
+    ps = subprocess.Popen('sudo python collector.py',shell=True,stdout=subprocess.PIPE,stderr=subprocess.STDOUT)
+    for line in iter(ps.stdout.readline, ''):
+        if line.startswith('STATUS:') and line.find('Writing collected info'):
+            macro['collect_status'] = "Collecton successful. Click visualize to display"
+
+    # res = collector.main()
+    os.chdir(BASE_DIR)
+    # return render(request,'static/don.html',macro)
+    return render(request,"don.html", macro)
