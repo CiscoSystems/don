@@ -1,0 +1,11 @@
+<form action="/don/ping/" method="post">
+    {% csrf_token %}
+    <tr align="center" class="table_header">
+    <div class="table_actions clearfix">
+	<div class="form-group">
+    {{ form }}
+	</div>
+	</tr>
+	<input class="btn btn-primary" type="submit" value="Submit" />
+	</div>
+</form>
