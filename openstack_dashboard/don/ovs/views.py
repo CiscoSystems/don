@@ -32,7 +32,7 @@ def view(request):
     pwd = settings.ROOT_PATH#+'/openstack_dashboard/dashboards/admin/don/'
 
     JSON_FILE = pwd + '/don/ovs/don.json'
-    static_path = settings.STATIC_URL
+    static_path = settings.STATIC_ROOT
     '''
     COMPUTE_DOT_FILE = pwd + '/don/ovs/static/compute.dot'
     COMPUTE_SVG_FILE = pwd + '/don/ovs/static/compute.svg'
@@ -41,12 +41,12 @@ def view(request):
     COMBINED_DOT_FILE = pwd + '/don/ovs/static/don.dot'
     COMBINED_SVG_FILE = pwd + '/don/ovs/static/don.svg'
     '''
-    COMPUTE_DOT_FILE = pwd + '/static/don/compute.dot'
-    COMPUTE_SVG_FILE = pwd + '/static/don/compute.svg'
-    NETWORK_DOT_FILE = pwd + '/static/don/network.dot'
-    NETWORK_SVG_FILE = pwd + '/static/don/network.svg'
-    COMBINED_DOT_FILE = pwd + '/static/don/don.dot'
-    COMBINED_SVG_FILE = pwd + '/static/don/don.svg'
+    COMPUTE_DOT_FILE = static_path + '/don/compute.dot'
+    COMPUTE_SVG_FILE = static_path + '/don/compute.svg'
+    NETWORK_DOT_FILE = static_path + '/don/network.dot'
+    NETWORK_SVG_FILE = static_path + '/don/network.svg'
+    COMBINED_DOT_FILE = static_path + '/don/don.dot'
+    COMBINED_SVG_FILE = static_path + '/don/don.svg'
     
     macro = {}
     # return HttpResponseRedirect('static/view.html')
