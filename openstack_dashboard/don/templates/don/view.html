@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<title>DON: Internal View</title>
+        <link rel="stylesheet" type="text/css" href="don.css">
+	</head>
+	<body>
+    <div id="internal">
+        <table width="100%">
+        <th class="title">
+            DON: Internal View
+        </th>
+        <tr>
+            <td align="right" class="table_header">
+            <button class="btn btn-default btn-sm ajax-modal btn-launch ajax-update"
+                onClick="location.href='/dashboard/don/analyze'"><span class="fa fa-search"></span>
+                Analyze</button>
+            &nbsp;&nbsp;&nbsp;
+            <button class="btn btn-default btn-sm ajax-modal btn-launch ajax-update"
+                onClick="location.href='/dashboard/don/ping'">
+                Ping Tracer</button>
+            </td>
+        </tr>
+        <tr>
+            <td><object class="emb" data="{{STATIC_URL}}don/don.svg" width="100%" height="850" type="image/svg+xml" id="don_svg"></object></td>
+            <!-- <img src='test.png'> -->
+        </tr>
+    </table>
+    </div>
+	</body>
+</html>
+
