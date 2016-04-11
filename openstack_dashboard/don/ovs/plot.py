@@ -37,6 +37,13 @@ class DotGenerator:
                 self.highlight_info['net_info'] = {'pass'   : [],
                                                    'fail'   : []
                                                    }
+            self.highlight_info['src_info'].update({'pass'   : [],
+                                               'fail'   : []
+                                               })
+            self.highlight_info['dst_info'].update({'pass'   : [],
+                                               'fail'   : []
+                                               })
+                                                   
 
         self.info = load_json(self.json_filename)
         self.outfile = None

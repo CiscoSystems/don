@@ -111,16 +111,16 @@ def ping(request):
             router = form.cleaned_data['router']
             #html = '<html><body>SIP: %s DIP: %s router: %s</body></html>' % (src_ip, dst_ip, router)
             #return HttpResponse(html)
-
-            pwd = settings.BASE_DIR
-            JSON_FILE = pwd + '/ovs/don.json'
+            static_path = settings.STATIC_ROOT
+            pwd = settings.ROOT_PATH
+            JSON_FILE = pwd + '/don/ovs/don.json'
 
             params = {
-                    'json_file' : pwd + '/ovs/don.json',
+                    'json_file' : pwd + '/don/ovs/don.json',
                     'src_ip'    : src_ip,
                     'dst_ip'    : dst_ip,
                     'router'    : router,
-                    'path_file' : pwd + '/ovs/static/ping.html',
+                    'path_file' : static_path + '/don/ping.html',
                     'username'  : 'cirros',
                     'passwd'    : 'cubswin:)',
                     'count'     : 2,
@@ -130,14 +130,16 @@ def ping(request):
                     }
             path.path(params)
 
-            JSON_FILE = pwd + '/ovs/don.json'
+            JSON_FILE = pwd + '/don/ovs/don.json'
             COMPUTE_DOT_FILE  = None
             COMPUTE_SVG_FILE  = None
             NETWORK_DOT_FILE  = None
             NETWORK_SVG_FILE  = None
-            COMBINED_DOT_FILE = pwd + '/ovs/static/ping.dot'
-            COMBINED_SVG_FILE = pwd + '/ovs/static/ping.svg'
-            HIGHLIGHT_FILE    = pwd + '/ovs/static/ping.html'
+            COMBINED_DOT_FILE = static_path + '/don/ping.dot'
+            COMBINED_SVG_FILE = static_path + '/don/ping.svg'
+            # HIGHLIGHT_FILE    = pwd + '/don/ovs/static/ping.html'
+            HIGHLIGHT_FILE    = static_path + '/don/ping.html'
+
 
             plotter = DotGenerator(JSON_FILE,
                                    COMPUTE_DOT_FILE,
@@ -151,7 +153,8 @@ def ping(request):
             plotter.plot_combined()
             plotter.generate_combined_svg()
 
-            return HttpResponseRedirect('/static/path.html')
+            # return HttpResponseRedirect('/static/path.html')
+            return render(request, 'don/ovs/path.html')
 
     # if a GET (or any other method) we'll create a blank form
     else:
