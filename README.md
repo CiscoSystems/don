@@ -41,9 +41,8 @@ OpenStack Liberty Summit, we will be moving this to
 
 0. You must have a [devstack setup running on a single VM](http://docs.openstack.org/developer/devstack/guides/single-vm.html).
 1. [Download and source the project specific rc file](http://docs.openstack.org/user-guide/common/cli_set_environment_variables_using_openstack_rc.html).
-2. Copy the DON source to Horizon directory.
-3. `python manage.py collectstatic.` This collects the needed static files for Horizon dashboard.
-4. Restart Horizon service.
+2. Copy the DON source to Horizon directory.(/opt/stack/horizon/)
+3. Restart Horizon by executing `sudo service apache2 restart`
 
 ### TODO/Known Issues:
 Please look at issues in the github repo.
