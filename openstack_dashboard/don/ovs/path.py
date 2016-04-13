@@ -358,7 +358,7 @@ def get_next_hop (src_info, dst_info, qrouter, params):
     a = json.loads(output)
 
     if not a['pass']:
-        return next_hop
+        return []
 
     json_file   = params['json_file']
     info = load_json(json_file)
