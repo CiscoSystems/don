@@ -8,7 +8,7 @@ from django.shortcuts import render_to_response
 from horizon import messages
 
 import analyzer
-# import path
+import path
 
 
 from django.shortcuts import render

@@ -402,8 +402,8 @@ def path (params):
     settings['debug']               = True
     BASE_DIR = os.path.dirname(os.path.dirname(__file__))
     CUR_DIR = os.getcwd()
-    if not re.search('don/Don/don', CUR_DIR):
-        os.chdir(CUR_DIR + '/ovs')
+    if not re.search('/openstack_dashboard/don/', CUR_DIR):
+        os.chdir(BASE_DIR + '/ovs')
     NEW_DIR = os.getcwd()
     debug(BASE_DIR + ':' + CUR_DIR + ':' + NEW_DIR)
 
