@@ -128,7 +128,11 @@ def ping(request):
                     'debug'     : True,
                     'plot'      : False,
                     }
-            path.path(params)
+            response = path.path(params)
+            if response:
+                error_text = response
+                messages.error(request,error_text)
+                return render(request, 'don/ovs/ping.html', {'form': form})
 
             JSON_FILE = pwd + '/don/ovs/don.json'
             COMPUTE_DOT_FILE  = None

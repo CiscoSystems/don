@@ -421,6 +421,13 @@ def path (params):
     src_info = get_port_info(info, src_ip)
     dst_info = get_port_info(info, dst_ip)
 
+    if src_info == None:
+        return "Source ip not found on the network"
+    if dst_info == None:
+        return "Destination ip not found on the network"
+    if qrouter == None:
+        return "No such router information found on the network"
+
     # src and dst are in the same network
     if src_info['tag'] == dst_info['tag']:
         path_same_network(params)
