@@ -3,10 +3,7 @@
 > [Presented in the OpenStack Liberty Summit, Vancouver, May, 2015]
 (https://www.openstack.org/summit/vancouver-2015/summit-videos/presentation/don-diagnosing-ovs-in-neutron "DON Presentation at OpenStack Liberty Summit, Vancouver, May 2015").
 
-[quote]
-## Notice
-DON is now integrated with Horizon. See #how-to-run.
-[/quote]
+`DON is now integrated with Horizon. See #how-to-run.`
 
 Neutron provides Networking-as-a-service in the OpenStack ecosystem. Networking
 functionalities are provided by plugins that implement well-defined Neutron
