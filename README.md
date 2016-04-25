@@ -10,8 +10,8 @@ functionalities are provided by plugins that implement well-defined Neutron
 APIs. Among many, the Open vSwitch plugin (OVS) is possibly the most widely
 used. Any practical OpenStack installation has complicated networking
 configuration and verifying it manually is time consuming and error prone.
-DON, written primarily in Python, and *available as a dashboard in OpenStack
-Horizon, Libery release*, is a network analysis and diagnostic system and provides a
+DON, written primarily in Python, and **available as a dashboard in OpenStack
+Horizon, Libery release**, is a network analysis and diagnostic system and provides a
 completely automated service for verifying and diagnosing the
 networking functionality provided by OVS. This service verifies (or points out
 deviations) that the user configuration is indeed reflected in the underlying
