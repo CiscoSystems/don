@@ -1,17 +1,17 @@
-# DON: Diagnosing OVS in Neutron
+# DON: Diagnosing OpenStack Networking
+
+
 
 > [Presented in the OpenStack Liberty Summit, Vancouver, May, 2015]
 (https://www.openstack.org/summit/vancouver-2015/summit-videos/presentation/don-diagnosing-ovs-in-neutron "DON Presentation at OpenStack Liberty Summit, Vancouver, May 2015").
-
-`DON is now integrated with Horizon. See #how-to-run.`
 
 Neutron provides Networking-as-a-service in the OpenStack ecosystem. Networking
 functionalities are provided by plugins that implement well-defined Neutron
 APIs. Among many, the Open vSwitch plugin (OVS) is possibly the most widely
 used. Any practical OpenStack installation has complicated networking
 configuration and verifying it manually is time consuming and error prone.
-DON, written in [django](https://www.djangoproject.com/), is a network analysis
-and diagnostic system and provides a
+DON, written primarily in Python, and *available as a dashboard in OpenStack
+Horizon, Libery release*, is a network analysis and diagnostic system and provides a
 completely automated service for verifying and diagnosing the
 networking functionality provided by OVS. This service verifies (or points out
 deviations) that the user configuration is indeed reflected in the underlying
