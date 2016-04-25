@@ -1,7 +1,12 @@
-## DON: Diagnosing OVS in Neutron
+# DON: Diagnosing OVS in Neutron
 
 > [Presented in the OpenStack Liberty Summit, Vancouver, May, 2015]
 (https://www.openstack.org/summit/vancouver-2015/summit-videos/presentation/don-diagnosing-ovs-in-neutron "DON Presentation at OpenStack Liberty Summit, Vancouver, May 2015").
+
+[quote]
+## Notice
+DON is now integrated with Horizon. See #how-to-run.
+[/quote]
 
 Neutron provides Networking-as-a-service in the OpenStack ecosystem. Networking
 functionalities are provided by plugins that implement well-defined Neutron
@@ -44,11 +49,8 @@ OpenStack Liberty Summit, we will be moving this to
 2. Copy the DON source to Horizon directory.(/opt/stack/horizon/)
 3. Restart Horizon by executing `sudo service apache2 restart`
 
-### TODO/Known Issues:
-Please look at issues in the github repo.
-
-## Issues/Comments:
-If you have questions, bugs, or feature requests, file an issue or send email
+## TODO/Known Issues:
+Please look at issues in the github repo. If you have questions, bugs, or feature requests, file an issue or send email
 to:
 
 * Amit Saha (amisaha+don@cisco.com)
