@@ -37,7 +37,11 @@ OpenStack Liberty Summit, we will be moving this to
 
 ### Prerequisites:
 
-* Django version must be 1.7 or later.
+* Django version must be 1.7 or later. However, since OpenStack Horizon uses
+  Django, there is no need to separately install Django.
+
+* The [Graphviz dot](http://www.graphviz.org/) utility. This is used for
+  drawing the visualization.
 
 ### Steps:
 
