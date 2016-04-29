@@ -348,7 +348,13 @@ def nova_list_parser (parse_this):
             vm_dict[vm] = {'interfaces' : {}}
 
         for entry in networks:
-            (network, ip) = entry.split(',')[0].split('=')
+            # excluding ipv6 ip
+            if len(entry.split(',')) > 1:
+                network=entry.split('=')[0]
+                ip = filter(lambda a:re.search("(\d+\.\d+\.\d+\.\d+)",a)!=None ,\
+                    entry.split('=')[1].split(','))[0].strip()
+            else:
+                (network, ip) = entry.split(',')[0].split('=')
             vm_dict[vm]['interfaces'][ip] = {'network': network}
 
     pass
