@@ -9,6 +9,7 @@ from horizon import messages
 
 import analyzer
 import path
+from common import execute_cmd,get_instance_ips,get_env,get_router_names
 
 
 from django.shortcuts import render
@@ -163,6 +164,23 @@ def ping(request):
     # if a GET (or any other method) we'll create a blank form
     else:
         form = PingForm()
+        BASE_DIR = settings.ROOT_PATH + '/don/ovs/'
+        myenv = os.environ.copy()
+        myenv.update(get_env(BASE_DIR + 'admin-openrc.sh'))
+        output = execute_cmd(['nova', 'list'], sudo=False, shell=False, env=myenv).split('\n');
+        ip_list = get_instance_ips(output)
+        ip_list.sort()
+        router_op = execute_cmd(['neutron', 'router-list'], sudo=False, shell=False, env=myenv).split('\n');
+        router_list = get_router_names(router_op)
+        router_list.sort()
+        # insert first value of select menu
+        ip_opt = zip(ip_list,ip_list)
+        router_opt = zip(router_list,router_list)
+        # ip_opt.insert(0,('','Select IP address'))
+        # router_opt.insert(0,('','Select Router'))
+        form.fields['src_ip'].widget.choices = ip_opt
+        form.fields['dst_ip'].widget.choices = ip_opt
+        form.fields['router'].widget.choices = router_opt
 
     return render(request, 'don/ovs/ping.html', {'form': form})
 
