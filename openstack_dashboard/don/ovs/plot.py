@@ -37,13 +37,7 @@ class DotGenerator:
                 self.highlight_info['net_info'] = {'pass'   : [],
                                                    'fail'   : []
                                                    }
-            self.highlight_info['src_info'].update({'pass'   : [],
-                                               'fail'   : []
-                                               })
-            self.highlight_info['dst_info'].update({'pass'   : [],
-                                               'fail'   : []
-                                               })
-                                                   
+                                                  
 
         self.info = load_json(self.json_filename)
         self.outfile = None
@@ -78,9 +72,9 @@ class DotGenerator:
             if port.replace('.', '') == self.highlight_info['src_info']['ip'].replace('.', '') or \
                port.replace('.', '') == self.highlight_info['dst_info']['ip'].replace('.', ''):
                 return self.highlight_info['ping_pass']
-            if port in self.highlight_info['src_info']['pass'] or \
-               port in self.highlight_info['dst_info']['pass'] or \
-               port in self.highlight_info['net_info']['pass'] :
+            if self.highlight_info['src_info'].has_key('pass') and port in self.highlight_info['src_info']['pass'] or \
+               self.highlight_info['dst_info'].has_key('pass') and port in self.highlight_info['dst_info']['pass'] or \
+               self.highlight_info['net_info'].has_key('pass') and port in self.highlight_info['net_info']['pass'] :
                 return True
         return False
 
@@ -89,9 +83,9 @@ class DotGenerator:
             if port.replace('.', '') == self.highlight_info['src_info']['ip'].replace('.', '') or \
                port.replace('.', '') == self.highlight_info['dst_info']['ip'].replace('.', ''):
                 return not self.highlight_info['ping_pass']
-            if port in self.highlight_info['src_info']['fail'] or \
-               port in self.highlight_info['dst_info']['fail'] or \
-               port in self.highlight_info['net_info']['fail'] :
+            if self.highlight_info['src_info'].has_key('fail') and port in self.highlight_info['src_info']['fail'] or \
+               self.highlight_info['dst_info'].has_key('fail') and port in self.highlight_info['dst_info']['fail'] or \
+               self.highlight_info['net_info'].has_key('fail') and port in self.highlight_info['net_info']['fail'] :
                 return True
         return False
 
