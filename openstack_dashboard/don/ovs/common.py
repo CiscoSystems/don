@@ -4,7 +4,7 @@ import paramiko
 import sys
 import re
 import pprint
-import subprocess
+import subprocess,os
 
 # Program settings
 settings = {
@@ -202,3 +202,54 @@ def execute_cmd (cmd, sudo=False, shell=False, env=None):
                 env=env,
                 universal_newlines=True).replace('\t', '    ')
 
+def get_instance_ips(objs):
+    ip_list = []
+    for line in objs:
+        if re.search('^\+', line) or re.search('^$', line) or re.search('Networks', line):
+            continue
+        parts = line.split('|')
+        parts = [x.strip() for x in parts]
+        vm = parts[2]
+        networks = parts[6].split(';')
+        networks = [x.strip() for x in networks]
+        for entry in networks:
+            # excluding ipv6 ip
+            if len(entry.split(','))>1:
+                network=entry.split('=')[0]
+                ip = filter(lambda a:re.search("(\d+\.\d+\.\d+\.\d+)",a)!=None ,\
+                    entry.split('=')[1].split(','))[0].strip()
+                ip_list.append(ip)
+            else:
+                ip_list.append(entry.split(',')[0].split('=')[1])
+    return ip_list
+
+def get_router_names(objs):
+    routers = []
+
+    for line in objs:
+        if re.search('^\+', line) or re.search('^$', line) or re.search('external_gateway_info', line):
+            continue
+        parts = line.split('|')
+        parts = [x.strip() for x in parts]
+
+        name = parts[2]
+        routers.append(name)
+    return routers
+
+
+
+def get_env(file_path):
+    try:
+        lines=open(file_path,'r').read().splitlines()
+    except IOError,e:
+        print "%s :%s"%(e.args[1],filename)
+        raise
+    env = {}
+    for line in lines:
+        if line.startswith('export'):
+            m = re.search(r'export (.+)=(.+)', line)
+            if m:
+                key = m.group(1).replace('"','')
+                val = m.group(2).replace('"','')
+                env.update({key:val})
+    return env
