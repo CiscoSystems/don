@@ -18,16 +18,16 @@ deviations) that the user configuration is indeed reflected in the underlying
 infrastructure and presents the results in an intuitive graphical display.
 
 As an example, given the following Neutron network topology:
-![Neutron: Network Topology](/openstack_dashboard/don/ovs/static/net_topology.PNG "Neutron: Network Topology")
+![Neutron: Network Topology](/openstack_dashboard/don/ovs/static/net_topology.png "Neutron: Network Topology")
 
 DON generates the following view of the networking internals,
-![DON: Internal View](/openstack_dashboard/don/ovs/static/don_internal.PNG "DON: Internal View")
+![DON: Internal View](/openstack_dashboard/don/ovs/static/don_internal.png "DON: Internal View")
 
 does OVS tests and ping tests,
-![DON: Analysis](/openstack_dashboard/don/ovs/static/don_analysis.PNG "DON: Analysis")
+![DON: Analysis](/openstack_dashboard/don/ovs/static/don_analysis.png "DON: Analysis")
 
 and also allows the user to do ping tracing
-![DON: Ping Tracer](/openstack_dashboard/don/ovs/static/don_ping_notworking.PNG "DON: Ping Tracer")
+![DON: Ping Tracer](/openstack_dashboard/don/ovs/static/don_ping_notworking.png "DON: Ping Tracer")
 
 The project is in beta status and owing to overwhelming response at the
 OpenStack Liberty Summit, we will be moving this to
