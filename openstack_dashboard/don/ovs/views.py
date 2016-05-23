@@ -198,7 +198,6 @@ def collect(request):
         if line.startswith('STATUS:') and line.find('Writing collected info')!=-1:
             status = 1
             macro['collect_status'] = "Collecton successful. Click visualize to display"
-    f.close()
     # res = collector.main()
     os.chdir(BASE_DIR)
     # return render(request,'static/don.html',macro)
