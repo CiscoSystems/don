@@ -1,4 +1,6 @@
-## DON: Diagnosing OVS in Neutron
+# DON: Diagnosing OpenStack Networking
+
+
 
 > [Presented in the OpenStack Liberty Summit, Vancouver, May, 2015]
 (https://www.openstack.org/summit/vancouver-2015/summit-videos/presentation/don-diagnosing-ovs-in-neutron "DON Presentation at OpenStack Liberty Summit, Vancouver, May 2015").
@@ -8,8 +10,8 @@ functionalities are provided by plugins that implement well-defined Neutron
 APIs. Among many, the Open vSwitch plugin (OVS) is possibly the most widely
 used. Any practical OpenStack installation has complicated networking
 configuration and verifying it manually is time consuming and error prone.
-DON, written in [django](https://www.djangoproject.com/), is a network analysis
-and diagnostic system and provides a
+DON, written primarily in Python, and **available as a dashboard in OpenStack
+Horizon, Libery release**, is a network analysis and diagnostic system and provides a
 completely automated service for verifying and diagnosing the
 networking functionality provided by OVS. This service verifies (or points out
 deviations) that the user configuration is indeed reflected in the underlying
@@ -35,7 +37,11 @@ OpenStack Liberty Summit, we will be moving this to
 
 ### Prerequisites:
 
-* Django version must be 1.7 or later.
+* Django version must be 1.7 or later. However, since OpenStack Horizon uses
+  Django, there is no need to separately install Django.
+
+* The [Graphviz dot](http://www.graphviz.org/) utility. This is used for
+  drawing the visualization.
 
 ### Steps:
 
@@ -44,11 +50,8 @@ OpenStack Liberty Summit, we will be moving this to
 2. Copy the DON source to Horizon directory.(/opt/stack/horizon/)
 3. Restart Horizon by executing `sudo service apache2 restart`
 
-### TODO/Known Issues:
-Please look at issues in the github repo.
-
-## Issues/Comments:
-If you have questions, bugs, or feature requests, file an issue or send email
+## TODO/Known Issues:
+Please look at issues in the github repo. If you have questions, bugs, or feature requests, file an issue or send email
 to:
 
 * Amit Saha (amisaha+don@cisco.com)
