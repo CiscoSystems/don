@@ -2,11 +2,12 @@ from horizon import views
 from django.http import HttpResponse, HttpResponseRedirect
 from django.conf import settings
 from plot import DotGenerator
-import os,subprocess,shlex
+import os,subprocess
 from .forms import PingForm
 from django.shortcuts import render_to_response
 from horizon import messages
 import json
+import shlex
 
 import analyzer
 import path
