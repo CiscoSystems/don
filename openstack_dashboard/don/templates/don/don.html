@@ -20,7 +20,6 @@
             }
             $loading.hide();
             $('.collect').click(function(){
-
                 $.ajax({
                     type: "GET",
                     url: "/dashboard/don/collect",
@@ -41,7 +40,6 @@
                         $("#content .value").html("Error while collecting data..");
                     }
                 });
-
             });
         });
         </script>
@@ -72,9 +70,6 @@
                   <!-- <h5>{{collect_status}}</h5> -->
                   <img src='{{STATIC_URL}}don/loading_dots.gif'  /><BR>
                   <p>  Collecting Data </p>
-<!--                 <div class="progress progress-striped active">
-                  <div class="progress-bar" style="width: 100%"></div>
-                </div>                 -->
                 <div id='content'>
                   <strong><p class='value'>{{collect_status}}</p></strong>
                 </div>
