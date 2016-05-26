@@ -2,20 +2,10 @@
 <html>
     <head>
     <title>DON: Diagnosing OpenStack Networking</title>
-        <!-- <link rel="stylesheet" type="text/css" href="/static/don.css"> -->
         <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.2.2/jquery.min.js"></script>
         <script>
         $(document).ready(function() {
-
             var $loading = $('#inprogress').hide();
-
-            // $(document)
-            //   .ajaxStart(function () {
-            //     $loading.show();
-            //   })
-            //   .ajaxStop(function () {
-            //     $loading.hide();
-            //   });
             function get_status(){
                 console.log('getting status')
                 var status = $.ajax({
@@ -53,8 +43,6 @@
                 });
 
             });
-
-
         });
         </script>
     </head>
@@ -65,23 +53,15 @@
             DON: Diagnosing OpenStack Networking
         </th>
     <tr>
-
         <td><BR>
         <span class="label label-primary">Step 1</span> Collect <nbsp>
         <span class="label label-primary">Step 2</span> Visualize <nbsp>
         <span class="label label-primary">Step 3</span> Analyze or Ping Trace <nbsp></td>
-
-        <!-- <b>Step 1:</b> Collect, 
-        <b>Step 2:</b> Visualize, 
-        <b>Step 3:</b> Analyze or Ping Trace</td> -->
     </tr>
         <tr>
             <td align="right" class="table_header">
             <button class="btn btn-default collect"><span class="fa fa-download"></span>    Collect</button>  
-
-            <button class="btn btn-default btn-sm ajax-modal btn-launch ajax-update"
-                onClick="location.href='/dashboard/don/view'"><span class="fa fa-pencil"></span>
-                    Visualize</button>
+            <button class="btn btn-default btn-sm ajax-modal btn-launch ajax-update" onClick="location.href='/dashboard/don/view'"><span class="fa fa-pencil"></span>Visualize</button>
             </td>
         </tr>
         <tr>
@@ -100,10 +80,9 @@
                 </div>
                 </div>
             </td>
-        </tr>                
+        </tr>
     </table>
     </div>
-
     </body>
 </html>
 
