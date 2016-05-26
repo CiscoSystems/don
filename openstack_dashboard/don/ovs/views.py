@@ -6,8 +6,6 @@ import os,subprocess
 from .forms import PingForm
 from django.shortcuts import render_to_response
 from horizon import messages
-import json
-import shlex
 
 import analyzer
 import path
@@ -190,37 +188,24 @@ def ping(request):
 def collect(request):
     macro = {'collect_status':'Collection failed'}
     status = 0
+    
     BASE_DIR = settings.ROOT_PATH
     CUR_DIR = os.getcwd()
     os.chdir(BASE_DIR + '/don/ovs')
     cmd = 'sudo python collector.py'
-
-    for line in run_command(cmd):    
-        if line.startswith('STATUS:') and line.find('Writing collected info')!=-1:
+    ps = subprocess.Popen('sudo python collector.py',shell=True,stdout=subprocess.PIPE,stderr=subprocess.STDOUT)
+    print ps
+    for line in iter(ps.stdout.readline, ''):
+        print line
+        if line.startswith('STATUS:') and line.find('Writing collected info'):
             status = 1
             macro['collect_status'] = "Collecton successful. Click visualize to display"
+
     # res = collector.main()
     os.chdir(BASE_DIR)
     # return render(request,'static/don.html',macro)
     if status:
-        messages.success(request, macro['collect_status'])
+      messages.success(request, macro['collect_status'])
     else:
-        messages.error(request,macro['collect_status'])
-    # return render(request,"don/ovs/index.html", macro)
-    resp = HttpResponse(json.dumps(macro),content_type="application/json")
-    return resp
-
-def run_command(cmd):
-    ps = subprocess.Popen(shlex.split(cmd), stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
-    while(True):
-        ret = ps.poll() #returns None while subprocess is running
-        line = ps.stdout.readline()
-        yield line
-        if(ret is not None):
-            break
-
-def get_status(request):
-    BASE_DIR = settings.ROOT_PATH + '/don/ovs/'
-    status = open(BASE_DIR + 'collector_log.txt','r').readline()
-    if status != " " and status != '\n':
-        return HttpResponse(json.dumps({'status':status}),content_type="application/json")
+      messages.error(request,macro['collect_status'])
+    return render(request,"don/ovs/index.html", macro)

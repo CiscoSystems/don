@@ -42,17 +42,13 @@ def warning (msg):
 
 
 def status_update (msg):
-    # storing in log file for interactive display on UI
-    log = open('collector_log.txt','w')
     if not sys.stdout == sys.__stdout__:
         tmp = sys.stdout
         sys.stdout = sys.__stdout__
         print('STATUS: ' + msg)
-        log.write('msg')
         sys.stdout = tmp
     else:
         print('STATUS: ' + msg)
-        log.write(msg)
 
 def dump_json (json_info, json_filename):
     import json
