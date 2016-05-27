@@ -13,5 +13,6 @@ urlpatterns = patterns(
     url(r'^collect/', views.collect, name='collect'),
     url(r'^ping/', views.ping, name='ping'),
     url(r'^analyze/', views.analyze, name='analyze'),
+    url(r'^status/', views.get_status, name='get_status'),
     url(r'^$', IndexView.as_view(), name='index'),
 )
