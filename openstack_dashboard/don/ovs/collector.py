@@ -9,7 +9,7 @@ import os
 import sys
 
 from common import settings, debug, error, status_update, dump_json, load_json
-from common import execute_cmd
+from common import execute_cmd,connect_to_box,get_vm_credentials
 # from analyzer import analyze
 
 def get_env(filename):
@@ -796,6 +796,31 @@ def all_commands_executed (commands):
                 return False
     return True
 
+def get_vm_info_from_compute(cmd):
+    output = execute_cmd(['nova', 'hypervisor-list'], sudo=False, shell=False, env=myenv).split('\n');
+    compute_list = get_hypervisor(output)
+    vm_info = []
+    compute_creds = get_vm_credentials()
+    for node in compute_list:
+        creds = compute_creds.get('hypervisor').get(node,compute_creds.get('hypervisor')['default'])
+        ssh = connect_to_box(node,creds['username'],creds['password'])
+        (stdin,out,err) = ssh.exec_command('sudo ' + cmd)
+        vm_info.extend(out.read().splitlines())
+        ssh.close()
+    return vm_info
+
+def get_hypervisor(parse_this):
+    hypervisor = []
+    for line in parse_this:
+        if re.search('^\+', line) or re.search('^$', line) or re.search('Hypervisor hostname', line):
+            continue
+        parts = line.split('|')
+        parts = [x.strip() for x in parts]
+        name = parts[2]
+        hypervisor.append(name)
+    return hypervisor  
+
+
 def main():
     check_args()
 
@@ -821,7 +846,10 @@ def main():
                 if commands[cmd].get('env', False):
                     env = myenv
                 sudo = commands[cmd].get('sudo', False)
-                commands[cmd]['output'] = execute_cmd(commands[cmd]['cmd'], sudo=sudo, shell=shell, env=env).split('\n');
+                if cmd == 'cat_instance':
+                    commands[cmd]['output'] = get_vm_info_from_compute(commands[cmd]['cmd'])
+                else:
+                    commands[cmd]['output'] = execute_cmd(commands[cmd]['cmd'], sudo=sudo, shell=shell, env=env).split('\n');
                 commands[cmd]['parser'](commands[cmd]['output'])
                 commands[cmd]['done'] = True
 

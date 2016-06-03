@@ -5,6 +5,7 @@ import sys
 import re
 import pprint
 import subprocess,os
+import yaml
 
 # Program settings
 settings = {
@@ -257,3 +258,11 @@ def get_env(file_path):
                 val = m.group(2).replace('"','')
                 env.update({key:val})
     return env
+
+def get_vm_credentials(config_file='credentials.yaml'):
+    try:
+        with open(config_file,'r') as s:
+            return yaml.safe_load(s)
+    except IOError,e:
+        print '%s :%s'%(e.args[1],config_file)
+        raise
