@@ -10,7 +10,16 @@ import sys
 
 from common import settings, debug, error, status_update, dump_json, load_json
 from common import execute_cmd,connect_to_box,get_vm_credentials
+import ConfigParser
 # from analyzer import analyze
+
+don_config = ConfigParser.ConfigParser()
+try:
+    don_config.read('/etc/don/don.conf')
+except Exception,e:
+    print e
+deployment_type = don_config.get('DEFAULT','deployment_type')
+
 
 def get_env(filename):
     try:
@@ -809,6 +818,16 @@ def get_vm_info_from_compute(cmd):
         ssh.close()
     return vm_info
 
+def exec_on_remote(cmd):
+    node_details = get_vm_credentials()
+    creds = node_details.get('network')
+    # print "sudo "+cmd
+    ssh = connect_to_box(creds['hostname'],creds['username'],creds['password'])
+    (stdin,out,err) = ssh.exec_command(cmd)
+    if len(err.read()):
+        return []
+    return out.read().splitlines()    
+
 def get_hypervisor(parse_this):
     hypervisor = []
     for line in parse_this:
@@ -846,8 +865,15 @@ def main():
                 if commands[cmd].get('env', False):
                     env = myenv
                 sudo = commands[cmd].get('sudo', False)
-                if cmd == 'cat_instance':
-                    commands[cmd]['output'] = get_vm_info_from_compute(commands[cmd]['cmd'])
+                if deployment_type == 'multinode':
+                    # handling for network node
+                    if cmd.startswith('netns_'):
+                        commands[cmd]['output'] = exec_on_remote(commands[cmd]['cmd'])
+                    if cmd == 'cat_instance':
+                        commands[cmd]['output'] = get_vm_info_from_compute(commands[cmd]['cmd'])
+                        print commands[cmd]['output']
+                    else:
+                        commands[cmd]['output'] = execute_cmd(commands[cmd]['cmd'], sudo=sudo, shell=shell, env=env).split('\n');
                 else:
                     commands[cmd]['output'] = execute_cmd(commands[cmd]['cmd'], sudo=sudo, shell=shell, env=env).split('\n');
                 commands[cmd]['parser'](commands[cmd]['output'])
