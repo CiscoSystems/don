@@ -1,0 +1,8 @@
+---
+- hosts: don
+  sudo: yes
+  tasks:
+    - copy: src=openstack_dashboard dest=/usr/share/openstack-dashboard
+    - copy: src=static dest=/usr/share/openstack-dashboard/static
+    - copy: src=etc/don dest=/etc
+
