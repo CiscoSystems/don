@@ -55,7 +55,7 @@ OpenStack Liberty Summit, we will be moving this to
 0. You must have Ansible (version 2.0 or later) installed in execution server
 1. Clone DON source to execution server
 2. Open shell promt and execute the below command from DON directory 
-3. >>> ansible-playbook don_playbook.yaml -i (inventory file path) --ask-pass
+3. `ansible-playbook don_playbook.yaml -i <inventory file path> --ask-pass`
 
 ## TODO/Known Issues:
 Please look at issues in the github repo. If you have questions, bugs, or feature requests, file an issue or send email
