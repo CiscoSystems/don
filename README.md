@@ -43,12 +43,19 @@ OpenStack Liberty Summit, we will be moving this to
 * The [Graphviz dot](http://www.graphviz.org/) utility. This is used for
   drawing the visualization.
 
-### Steps:
+### Steps for DevStack:
 
 0. You must have a [devstack setup running on a single VM](http://docs.openstack.org/developer/devstack/guides/single-vm.html).
 1. [Download and source the project specific rc file](http://docs.openstack.org/user-guide/common/cli_set_environment_variables_using_openstack_rc.html).
 2. Copy the DON source to Horizon directory.(/opt/stack/horizon/)
 3. Restart Horizon by executing `sudo service apache2 restart`
+
+### Steps for Multinode Openstack:
+
+0. You must have Ansible (version 2.0 or later) installed in execution server
+1. Clone DON source to execution server
+2. Open shell promt and execute the below command from DON directory 
+3. `ansible-playbook don_playbook.yaml -i <inventory file path> --ask-pass`
 
 ## TODO/Known Issues:
 Please look at issues in the github repo. If you have questions, bugs, or feature requests, file an issue or send email
