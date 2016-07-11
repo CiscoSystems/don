@@ -63,6 +63,7 @@ class DotGenerator:
                 'pass'      :   '#b2f379',
                 'fail'      :   '#f00000',
                 'edge_pass' :   '#009900',
+                'floating_ip':  '#b3ffb3',
                 }
         self.__set_vlan_color_table()
         pprint.pprint(self.info)
@@ -331,6 +332,8 @@ edge [dir=none]
         self.__html_row_open()
         for vm in sorted(self.info['vms'].keys()):
             col_span = len(self.info['vms'][vm]['src_bridge'])
+            if self.info['floating_ips'].get(self.info['vms'][vm]['uuid']):
+                col_span = col_span + 1
             self.__html_row(vm, row_span, col_span, self.__get_color('vms'))
         self.__html_row_close()
 
@@ -338,6 +341,10 @@ edge [dir=none]
         self.__html_row_open()
         col_span = 1
         for vm in sorted(self.info['vms'].keys()):
+            floating_ip_info = self.info['floating_ips'].get(self.info['vms'][vm]['uuid'])
+            if floating_ip_info:
+                network = floating_ip_info.get('pool')
+                self.__html_row('Floating -'+network, row_span, col_span, self.colors['floating_ip'])
             for bridge in sorted(self.info['vms'][vm]['src_bridge']):
                 tag = get_vlan_tag(self.info, bridge)
                 ip = get_intf_ip(self.info, bridge)
@@ -353,6 +360,10 @@ edge [dir=none]
         # Plot the IPs for each port
         self.__html_row_open()
         for vm in sorted(self.info['vms'].keys()):
+            floating_ip_info = self.info['floating_ips'].get(self.info['vms'][vm]['uuid'])
+            if floating_ip_info:
+                ip = floating_ip_info.get('floating_ip')
+                self.__html_row(ip, row_span, col_span, self.colors['floating_ip'],ip.replace('.', ''))
             for bridge in sorted(self.info['vms'][vm]['src_bridge']):
                 tag = get_vlan_tag(self.info, bridge)
                 ip = get_intf_ip(self.info, bridge)

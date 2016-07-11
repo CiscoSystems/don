@@ -49,6 +49,7 @@ info = {
             'br-int'    : {'ports': {}},
             'br-tun'    : {'ports': {}}
             },
+        'floating_ips'  : {},
        }
 
 def add_new_command (cmd_dict, cmd_key, cmd):
@@ -627,6 +628,22 @@ def dummy_parser (parse_this):
     debug('Dummy Parser :-)')
     pass
 
+def floating_ip_list_parser(parse_this):
+    floating_ips = {}
+    for line in parse_this:
+        if re.search('^\+', line) or re.search('^$', line) or re.search('Pool', line):
+            continue
+        parts = line.split('|')
+        parts = [x.strip() for x in parts]
+        floating_ip = parts[2]
+        vm_id = parts[3]
+        pool = parts[5]
+        # ignore floating ips which is not assigned to any vms
+        if vm_id != '-':
+            floating_ips.update({vm_id:{'floating_ip':floating_ip,'pool':pool}})
+    info['floating_ips'] = floating_ips
+
+
 # static commands whose output have info that help us diagnose
 commands = {
         'nova_list':
@@ -782,6 +799,16 @@ commands = {
             'order' : 52,
             'parser': None,
             },
+        'instance_floating_ip_list':
+            {
+            'cmd'   : ['nova', 'floating-ip-list'],
+            'help'  : 'Collect floating ip information for instances',
+            'env'   : True,
+            'output': None,
+            'order' : 53,
+            'parser': floating_ip_list_parser,
+            },
+            
         }
 
 def check_args():
