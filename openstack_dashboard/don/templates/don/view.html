@@ -3,6 +3,17 @@
 	<head>
 		<title>DON: Internal View</title>
         <link rel="stylesheet" type="text/css" href="don.css">
+        <script type="text/javascript">
+            function download(){
+                var a = document.createElement("a");
+                var now = new Date();
+                var timestamp = now.toISOString()
+                a.href = "{{STATIC_URL}}don/don.svg";
+                a.download = "DON-Internal-View-"+timestamp+".svg";
+                a.click();
+
+            }
+        </script>
 	</head>
 	<body>
     <div id="internal">
@@ -19,6 +30,10 @@
             <button class="btn btn-default btn-sm ajax-modal btn-launch ajax-update"
                 onClick="location.href='/dashboard/don/ping'">
                 Ping Tracer</button>
+            &nbsp;&nbsp;&nbsp;
+            <button class="btn btn-default btn-sm"
+                onClick="download();"><span class="fa fa-download"></span>
+                Download Graph</button>
             </td>
         </tr>
         <tr>
