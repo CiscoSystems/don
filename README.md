@@ -1,9 +1,11 @@
 # DON: Diagnosing OpenStack Networking
 
-
-
 > [Presented in the OpenStack Liberty Summit, Vancouver, May, 2015]
 (https://www.openstack.org/summit/vancouver-2015/summit-videos/presentation/don-diagnosing-ovs-in-neutron "DON Presentation at OpenStack Liberty Summit, Vancouver, May 2015").
+
+A lot has changed since Vancouver! _Support for multi-node OpenStack
+installations and complete integrated with Horizon, Liberty release are among
+the things to look forward to._
 
 Neutron provides Networking-as-a-service in the OpenStack ecosystem. Networking
 functionalities are provided by plugins that implement well-defined Neutron
@@ -29,9 +31,7 @@ does OVS tests and ping tests,
 and also allows the user to do ping tracing
 ![DON: Ping Tracer](/openstack_dashboard/don/ovs/static/don_ping_notworking.png "DON: Ping Tracer")
 
-The project is in beta status and owing to overwhelming response at the
-OpenStack Liberty Summit, we will be moving this to
-[stackforge](https://github.com/stackforge) sometime soon.
+The project is in beta status and we are in the process of moving it to [stackforge](https://github.com/stackforge).
 
 ## How to Run:
 
