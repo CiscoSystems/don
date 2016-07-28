@@ -6,35 +6,33 @@ import pprint
 import re
 import argparse
 import os
-import sys
-
-from common import settings, debug, error, status_update, dump_json, load_json
-from common import execute_cmd,connect_to_box,get_vm_credentials
+from common import settings, debug, error, status_update, dump_json
+from common import execute_cmd, connect_to_box, get_vm_credentials
 import ConfigParser
 # from analyzer import analyze
 
 don_config = ConfigParser.ConfigParser()
 try:
     don_config.read('/etc/don/don.conf')
-except Exception,e:
+except Exception, e:
     print e
-deployment_type = don_config.get('DEFAULT','deployment_type')
+deployment_type = don_config.get('DEFAULT', 'deployment_type')
 
 
 def get_env(filename):
     try:
-        lines=open(os.getcwd()+os.sep+filename,'r').read().splitlines()
-    except IOError,e:
-        print "%s :%s"%(e.args[1],filename)
+        lines = open(os.getcwd() + os.sep + filename, 'r').read().splitlines()
+    except IOError, e:
+        print "%s :%s" % (e.args[1], filename)
         raise
     env = {}
     for line in lines:
         if line.startswith('export'):
             m = re.search(r'export (.+)=(.+)', line)
             if m:
-                key = m.group(1).replace('"','')
-                val = m.group(2).replace('"','')
-                env.update({key:val})
+                key = m.group(1).replace('"', '')
+                val = m.group(2).replace('"', '')
+                env.update({key: val})
     return env
 
 myenv = os.environ.copy()
@@ -42,37 +40,43 @@ myenv.update(get_env('admin-openrc.sh'))
 
 # Contains all info gathered by parsing the output of commands
 info = {
-        'vms'           : {},
-        'brctl'         : {},
-        'bridges'       : {
-            'br-ex'     : {'ports': {}},
-            'br-int'    : {'ports': {}},
-            'br-tun'    : {'ports': {}}
-            },
-        'floating_ips'  : {},
-       }
+    'vms': {},
+    'brctl': {},
+    'bridges': {
+        'br-ex': {'ports': {}},
+        'br-int': {'ports': {}},
+        'br-tun': {'ports': {}}
+    },
+    'floating_ips': {},
+}
 
-def add_new_command (cmd_dict, cmd_key, cmd):
+
+def add_new_command(cmd_dict, cmd_key, cmd):
     if cmd_dict.has_key(cmd_key):
         error(cmd_key + ' already exists in command dictionary')
         return
     cmd_dict[cmd_key] = cmd
 
-def record_linuxbridge (bridge, interface_list):
+
+def record_linuxbridge(bridge, interface_list):
     brctl_dict = info['brctl']
     if brctl_dict.has_key(bridge):
         error('Bridge ' + bridge + ' repeated! Overwriting!')
-    brctl_dict[bridge] = {'interfaces'  : interface_list}
+    brctl_dict[bridge] = {'interfaces': interface_list}
 
-def get_bridge_entry (br):
+
+def get_bridge_entry(br):
+    bridge_dict = info['bridges']
     if not bridge_dict.has_key(br):
-        error('Bridge ' + br + ' does not exist! Supported bridges: ' + str(bridge_dict.keys()))
+        error('Bridge ' + br + ' does not exist! Supported bridges: ' +
+              str(bridge_dict.keys()))
         return None
     return bridge_dict.get(br)
 
 
 #
-# Parser functions (for each command). Each function has the sample input as a comment above it.
+# Parser functions (for each command). Each function has the sample input
+# as a comment above it.
 #
 '''
   <uuid>31b1cfcc-ca85-48a9-a84a-8b222d377080</uuid>
@@ -82,7 +86,9 @@ def get_bridge_entry (br):
       <nova:name>VM2</nova:name>
       <source bridge='qbr6ce314cb-a5'/>
 '''
-def cat_instance_parser (parse_this):
+
+
+def cat_instance_parser(parse_this):
     vm_dict = info['vms']
 
     uuid = None
@@ -114,20 +120,23 @@ def cat_instance_parser (parse_this):
 
 
 '''
-bridge name	bridge id		STP enabled	interfaces
-qbr6ce314cb-a5		8000.9255d5550cf8	no		qvb6ce314cb-a5
-							tap6ce314cb-a5
-qbrb0f5cfc8-4d		8000.b2277f2c981b	no		qvbb0f5cfc8-4d
-							tapb0f5cfc8-4d
-virbr0		8000.000000000000	yes
+bridge name	bridge id   STP enabled	interfaces
+qbr6ce314cb-a5      8000.9255d5550cf8   no      qvb6ce314cb-a5
+                            tap6ce314cb-a5
+qbrb0f5cfc8-4d      8000.b2277f2c981b   no      qvbb0f5cfc8-4d
+                            tapb0f5cfc8-4d
+virbr0      8000.000000000000   yes
 '''
-def brctl_show_parser (parse_this):
+
+
+def brctl_show_parser(parse_this):
     interfaces = []
     bridge = None
     for line in parse_this:
         m = re.search('(qbr\S+)\s+\S+\s+\S+\s+(\S+)', line)
         if m:
-            # We already have a bridge, that means we are now lookign at the next bridge
+            # We already have a bridge, that means we are now lookign at the
+            # next bridge
             if bridge:
                 record_linuxbridge(bridge, interfaces)
                 interfaces = []
@@ -197,7 +206,9 @@ ubuntu@ubuntu-VirtualBox:~/don$ sudo ovs-vsctl show
                 type: internal
     ovs_version: "2.0.2"
 '''
-def ovs_vsctl_show_parser (parse_this):
+
+
+def ovs_vsctl_show_parser(parse_this):
     bridge = None
     bridge_dict = info['bridges']
     for line in parse_this:
@@ -205,7 +216,9 @@ def ovs_vsctl_show_parser (parse_this):
         if m:
             bridge = str(m.group(1))
             if not bridge_dict.has_key(bridge):
-                error('Skipping bridge [' + bridge + ']! Supported bridges: ' + str(bridge_dict.keys()))
+                error(
+                    'Skipping bridge [' + bridge + ']! Supported bridges: ' +
+                    str(bridge_dict.keys()))
                 bridge = None
                 continue
             bridge_entry = bridge_dict.get(bridge)
@@ -217,7 +230,7 @@ def ovs_vsctl_show_parser (parse_this):
             m = re.search('Port (\S+)', line)
             if m:
                 # the port names seem to have double quotes around them!
-                port = m.group(1).replace('"','')
+                port = m.group(1).replace('"', '')
                 if not bridge_entry['ports'].has_key(port):
                     bridge_entry['ports'][port] = {}
                 port_entry = bridge_entry['ports'][port]
@@ -249,7 +262,8 @@ def ovs_vsctl_show_parser (parse_this):
 OFPT_FEATURES_REPLY (xid=0x2): dpid:00008207ee8eee4d
 n_tables:254, n_buffers:256
 capabilities: FLOW_STATS TABLE_STATS PORT_STATS QUEUE_STATS ARP_MATCH_IP
-actions: OUTPUT SET_VLAN_VID SET_VLAN_PCP STRIP_VLAN SET_DL_SRC SET_DL_DST SET_NW_SRC SET_NW_DST SET_NW_TOS SET_TP_SRC SET_TP_DST ENQUEUE
+actions: OUTPUT SET_VLAN_VID SET_VLAN_PCP STRIP_VLAN SET_DL_SRC SET_DL_DST \
+SET_NW_SRC SET_NW_DST SET_NW_TOS SET_TP_SRC SET_TP_DST ENQUEUE
  4(patch-tun): addr:e2:ce:31:60:94:e0
      config:     0
      state:      0
@@ -286,10 +300,13 @@ actions: OUTPUT SET_VLAN_VID SET_VLAN_PCP STRIP_VLAN SET_DL_SRC SET_DL_DST SET_N
      speed: 0 Mbps now, 0 Mbps max
 OFPT_GET_CONFIG_REPLY (xid=0x4): frags=normal miss_send_len=0
 '''
-def ovs_ofctl_show_br_parser (bridge, parse_this):
+
+
+def ovs_ofctl_show_br_parser(bridge, parse_this):
     bridge_dict = info['bridges']
     if not bridge_dict.has_key(bridge):
-        error('Skipping bridge [' + bridge + ']! Supported bridges: ' + str(bridge_dict.keys()))
+        error('Skipping bridge [' + bridge +
+              ']! Supported bridges: ' + str(bridge_dict.keys()))
         return
     bridge_entry = bridge_dict.get(bridge)
     pprint.pprint(bridge_entry)
@@ -297,37 +314,41 @@ def ovs_ofctl_show_br_parser (bridge, parse_this):
     for line in parse_this:
         m = re.search('(\d+)\((\S+)\):\s+addr:(\S+)', line)
         if m:
-            port_id     = m.group(1)
-            port        = m.group(2)
-            port_mac    = m.group(3)
+            port_id = m.group(1)
+            port = m.group(2)
+            port_mac = m.group(3)
             if not bridge_entry['ports'].has_key(port):
                 bridge_entry['ports'][port] = {}
             port_entry = bridge_entry['ports'][port]
-            port_entry['id']  = port_id
+            port_entry['id'] = port_id
             port_entry['mac'] = port_mac
             continue
 
         m = re.search('(\w+)\((\S+)\):\s+addr:(\S+)', line)
         if m:
-            port_id     = m.group(1)
-            port        = m.group(2)
-            port_mac    = m.group(3)
+            port_id = m.group(1)
+            port = m.group(2)
+            port_mac = m.group(3)
             if not bridge_entry['ports'].has_key(port):
                 bridge_entry['ports'][port] = {}
             port_entry = bridge_entry['ports'][port]
-            port_entry['id']  = port_id
+            port_entry['id'] = port_id
             port_entry['mac'] = port_mac
 
     pass
 
 # These three are all wrappers for each of the three bridges
-def ovs_ofctl_show_br_int_parser (parse_this):
+
+
+def ovs_ofctl_show_br_int_parser(parse_this):
     ovs_ofctl_show_br_parser('br-int', parse_this)
 
-def ovs_ofctl_show_br_ex_parser (parse_this):
+
+def ovs_ofctl_show_br_ex_parser(parse_this):
     ovs_ofctl_show_br_parser('br-ex', parse_this)
 
-def ovs_ofctl_show_br_tun_parser (parse_this):
+
+def ovs_ofctl_show_br_tun_parser(parse_this):
     ovs_ofctl_show_br_parser('br-tun', parse_this)
 
 '''
@@ -341,11 +362,14 @@ def ovs_ofctl_show_br_tun_parser (parse_this):
 | ee4952a3-0700-42ea-aab3-7503bc9d87e2 | VM4   | ACTIVE | -          | Running     | private2=10.0.3.5; public=172.24.4.4; private=10.0.2.5 |
 +--------------------------------------+-------+--------+------------+-------------+--------------------------------------------------------+
 '''
-def nova_list_parser (parse_this):
+
+
+def nova_list_parser(parse_this):
     vm_dict = info['vms']
 
     for line in parse_this:
-        if re.search('^\+', line) or re.search('^$', line) or re.search('Networks', line):
+        if re.search('^\+', line) or re.search('^$', line) or \
+                re.search('Networks', line):
             continue
         parts = line.split('|')
         parts = [x.strip() for x in parts]
@@ -355,14 +379,14 @@ def nova_list_parser (parse_this):
         networks = [x.strip() for x in networks]
 
         if not vm_dict.has_key(vm):
-            vm_dict[vm] = {'interfaces' : {}}
+            vm_dict[vm] = {'interfaces': {}}
 
         for entry in networks:
             # excluding ipv6 ip
             if len(entry.split(',')) > 1:
-                network=entry.split('=')[0]
-                ip = filter(lambda a:re.search("(\d+\.\d+\.\d+\.\d+)",a)!=None ,\
-                    entry.split('=')[1].split(','))[0].strip()
+                network = entry.split('=')[0]
+                ip = filter(lambda a: re.search("(\d+\.\d+\.\d+\.\d+)", a) is not
+                            None, entry.split('=')[1].split(','))[0].strip()
             else:
                 (network, ip) = entry.split(',')[0].split('=')
             vm_dict[vm]['interfaces'][ip] = {'network': network}
@@ -391,18 +415,21 @@ def nova_list_parser (parse_this):
 | f57aa80e-2ef3-4031-a0a4-bc12d2445687 |      | fa:16:3e:2e:6e:91 | {"subnet_id": "dbc9717f-5a08-48bb-92e2-ed2da443541b", "ip_address": "10.0.3.3"}   |
 +--------------------------------------+------+-------------------+-----------------------------------------------------------------------------------+
 '''
-def neutron_port_list_parser (parse_this):
+
+
+def neutron_port_list_parser(parse_this):
     tap_to_ip = {}
 
     for line in parse_this:
-        if re.search('^\+', line) or re.search('^$', line) or re.search('fixed_ips', line):
+        if re.search('^\+', line) or re.search('^$', line) or \
+                re.search('fixed_ips', line):
             continue
 
         parts = line.split('|')
         parts = [x.strip() for x in parts]
 
         tap = parts[1][:11]
-        #ip = parts[4].split(':')[-1].replace('}', '')
+        # ip = parts[4].split(':')[-1].replace('}', '')
         m = re.search('"ip_address": "(\S+)"', parts[4])
         if m:
             ip = m.group(1)
@@ -419,11 +446,14 @@ def neutron_port_list_parser (parse_this):
 | ac41aab2-f9c3-4a06-8eef-f909ee1e6e50 | router  | {"network_id": "640ece56-c6dc-4868-8e7a-12547508098a", "enable_snat": true, "external_fixed_ips": [{"subnet_id": "75ae4ce8-495d-4f53-93d1-bf98e55d6658", "ip_address": "172.24.4.3"}]} | False       | False |
 +--------------------------------------+---------+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+-------------+-------+
 '''
-def neutron_router_list_parser (parse_this):
+
+
+def neutron_router_list_parser(parse_this):
     routers = {}
 
     for line in parse_this:
-        if re.search('^\+', line) or re.search('^$', line) or re.search('external_gateway_info', line):
+        if re.search('^\+', line) or re.search('^$', line) or \
+                re.search('external_gateway_info', line):
             continue
 
         parts = line.split('|')
@@ -442,9 +472,9 @@ def neutron_router_list_parser (parse_this):
         if m:
             ip_address = m.group(1)
 
-        routers[name] = {'id'           : router_id,
-                         'ip_address'   : ip_address,
-                         'network_id'   : network_id,
+        routers[name] = {'id': router_id,
+                         'ip_address': ip_address,
+                         'network_id': network_id,
                          }
 
     info['routers'] = routers
@@ -457,17 +487,18 @@ def neutron_router_list_parser (parse_this):
 
         cmd_key = 'netns_' + namespace
         cmd = {
-            'cmd'   : 'echo namespace: ' + namespace + '; echo "sudo ip netns exec ' + namespace + ' ip a" > /tmp/don.bash; bash /tmp/don.bash',
-            'help'  : 'Collect namespace info for l3-agent',
-            'shell' : True,
+            'cmd': 'echo namespace: ' + namespace + '; echo "sudo ip netns exec ' + namespace + ' ip a" > /tmp/don.bash; bash /tmp/don.bash',
+            'help': 'Collect namespace info for l3-agent',
+            'shell': True,
             'output': None,
-            'order' : 100,
+            'order': 100,
             'parser': ip_namespace_qrouter_parser,
-             }
-        add_new_command (commands, cmd_key, cmd)
+        }
+        add_new_command(commands, cmd_key, cmd)
     pass
 
-def ip_namespace_qrouter_parser (parse_this):
+
+def ip_namespace_qrouter_parser(parse_this):
     nm_dict = info['namespaces']
 
     qr_intf = None
@@ -510,7 +541,8 @@ def ip_namespace_qrouter_parser (parse_this):
             ip = None
     pass
 
-def ip_namespace_qdhcp_parser (parse_this):
+
+def ip_namespace_qdhcp_parser(parse_this):
     nm_dict = info['namespaces']
 
     tap_intf = None
@@ -542,7 +574,6 @@ def ip_namespace_qdhcp_parser (parse_this):
     pass
 
 
-
 '''
 +--------------------------------------+----------+----------------------------------------------------------+
 | id                                   | name     | subnets                                                  |
@@ -555,7 +586,9 @@ def ip_namespace_qdhcp_parser (parse_this):
 |                                      |          | 8e2c5cfd-fbc1-4fe0-9f5e-f0b0dc070fb8 10.0.0.0/24         |
 +--------------------------------------+----------+----------------------------------------------------------+
 '''
-def neutron_net_list_parser (parse_this):
+
+
+def neutron_net_list_parser(parse_this):
     networks = {}
 
     ip = 'unknown'
@@ -571,17 +604,17 @@ def neutron_net_list_parser (parse_this):
             possible_ip = m.group(3)
             if re.search('\.', possible_ip):
                 ip = possible_ip
-                networks[network_id] = {'name'  : name,
-                                        'ip'    : ip
-                                    }
+                networks[network_id] = {'name': name,
+                                        'ip': ip
+                                        }
         m = re.search('^\|\s+\|\s+\| \S+ (\S+)', line)
         if m:
             possible_ip = m.group(1)
             if re.search('\.', possible_ip):
                 ip = possible_ip
-                networks[network_id] = {'name'  : name,
-                                        'ip'    : ip
-                                   }
+                networks[network_id] = {'name': name,
+                                        'ip': ip
+                                        }
         ip = 'Unknown'
 
     info['networks'] = networks
@@ -597,14 +630,14 @@ def neutron_net_list_parser (parse_this):
 
         cmd_key = 'netns_' + namespace
         cmd = {
-            'cmd'   : 'echo namespace: ' + namespace + '; echo "sudo ip netns exec ' + namespace + ' ip a" > /tmp/don.bash; bash /tmp/don.bash',
-            'help'  : 'Collect namespace info for dhcp-agent',
-            'shell' : True,
+            'cmd': 'echo namespace: ' + namespace + '; echo "sudo ip netns exec ' + namespace + ' ip a" > /tmp/don.bash; bash /tmp/don.bash',
+            'help': 'Collect namespace info for dhcp-agent',
+            'shell': True,
             'output': None,
-            'order' : 110,
+            'order': 110,
             'parser': ip_namespace_qdhcp_parser,
-             }
-        add_new_command (commands, cmd_key, cmd)
+        }
+        add_new_command(commands, cmd_key, cmd)
     pass
 
 
@@ -615,7 +648,9 @@ qdhcp-49be53de-33ed-480a-a06e-6e77c8f887dc
 qrouter-8c981cdb-c19f-47c1-8149-f85a506c486c
 qdhcp-82b0e328-4530-495e-a43f-238ef7a53d62
 '''
-def ip_netns_parser (parse_this):
+
+
+def ip_netns_parser(parse_this):
     namespaces = {}
 
     for line in parse_this:
@@ -624,9 +659,11 @@ def ip_netns_parser (parse_this):
 
     info['namespaces'] = namespaces
 
-def dummy_parser (parse_this):
+
+def dummy_parser(parse_this):
     debug('Dummy Parser :-)')
     pass
+
 
 def floating_ip_list_parser(parse_this):
     floating_ips = {}
@@ -640,176 +677,178 @@ def floating_ip_list_parser(parse_this):
         pool = parts[5]
         # ignore floating ips which is not assigned to any vms
         if vm_id != '-':
-            floating_ips.update({vm_id:{'floating_ip':floating_ip,'pool':pool}})
+            floating_ips.update(
+                {vm_id: {'floating_ip': floating_ip, 'pool': pool}})
     info['floating_ips'] = floating_ips
 
 
 # static commands whose output have info that help us diagnose
 commands = {
-        'nova_list':
-            {
-            'cmd'   : ['nova', 'list'],
-            'help'  : 'Collect list of VMs from nova',
-            'env'   : True,
-            'output': None,
-            'order' : 1,
-            'parser': nova_list_parser,
-            },
+    'nova_list':
+    {
+        'cmd': ['nova', 'list'],
+        'help': 'Collect list of VMs from nova',
+                'env': True,
+                'output': None,
+                'order': 1,
+                'parser': nova_list_parser,
+    },
         'cat_instance':
             {
-            'cmd'   : 'cat /etc/libvirt/qemu/instance-*.xml | egrep -e "<uuid>" -e "nova:name" -e "source bridge"',
-            'help'  : 'Collect some info from the launched VMs',
-            'sudo'  : True,
-            'shell' : True,
-            'output': None,
-            'order' : 2,
-            'parser': cat_instance_parser,
-            },
+                'cmd': 'cat /etc/libvirt/qemu/instance-*.xml | egrep -e "<uuid>" -e "nova:name" -e "source bridge"',
+                'help': 'Collect some info from the launched VMs',
+                'sudo': True,
+                'shell': True,
+                'output': None,
+                'order': 2,
+                'parser': cat_instance_parser,
+    },
         'neutron_port_list':
             {
-            'cmd'   : ['neutron', 'port-list'],
-            'help'  : 'Collect neutron configured ports',
-            'env'   : True,
-            'output': None,
-            'order' : 3,
-            'parser': neutron_port_list_parser,
-            },
+                'cmd': ['neutron', 'port-list'],
+                'help': 'Collect neutron configured ports',
+                'env': True,
+                'output': None,
+                'order': 3,
+                'parser': neutron_port_list_parser,
+    },
         'neutron_router_list':
             {
-            'cmd'   : ['neutron', 'router-list'],
-            'help'  : 'Collect neutron configured routers',
-            'env'   : True,
-            'output': None,
-            'order' : 4,
-            'parser': neutron_router_list_parser,
-            },
+                'cmd': ['neutron', 'router-list'],
+                'help': 'Collect neutron configured routers',
+                'env': True,
+                'output': None,
+                'order': 4,
+                'parser': neutron_router_list_parser,
+    },
         'neutron_net_list':
             {
-            'cmd'   : ['neutron', 'net-list'],
-            'help'  : 'Collect neutron configured networks',
-            'env'   : True,
-            'output': None,
-            'order' : 5,
-            'parser': neutron_net_list_parser,
-            },
+                'cmd': ['neutron', 'net-list'],
+                'help': 'Collect neutron configured networks',
+                'env': True,
+                'output': None,
+                'order': 5,
+                'parser': neutron_net_list_parser,
+    },
         'ip_netns':
             {
-            'cmd'   : ['ip', 'netns'],
-            'help'  : 'Collect network namespaces',
-            'output': None,
-            'order' : 6,
-            'parser': ip_netns_parser,
-            },
+                'cmd': ['ip', 'netns'],
+                'help': 'Collect network namespaces',
+                'output': None,
+                'order': 6,
+                'parser': ip_netns_parser,
+    },
 
         'brctl_show':
             {
-            'cmd'   : ['brctl', 'show'],
-            'help'  : 'Collect information about bridges (linuxbridge) configured',
-            'output': None,
-            'order' : 10,
-            'parser': brctl_show_parser,
-            },
+                'cmd': ['brctl', 'show'],
+                'help': 'Collect information about bridges (linuxbridge) configured',
+                'output': None,
+                'order': 10,
+                'parser': brctl_show_parser,
+    },
         'ovs_appctl_fdb_show_br_ex':
             {
-            'cmd'   : ['ovs-appctl', 'fdb/show', 'br-ex'],
-            'help'  : 'Collect mac data base for bridge br-ex',
-            'sudo'  : True,
-            'output': None,
-            'order' : 20,
-            'parser': None,
-            },
+                'cmd': ['ovs-appctl', 'fdb/show', 'br-ex'],
+                'help': 'Collect mac data base for bridge br-ex',
+                'sudo': True,
+                'output': None,
+                'order': 20,
+                'parser': None,
+    },
         'ovs_appctl_fdb_show_br_int':
             {
-            'cmd'   : ['ovs-appctl', 'fdb/show', 'br-int'],
-            'help'  : 'Collect mac data base for ovs bridge br-int',
-            'sudo'  : True,
-            'output': None,
-            'order' : 21,
-            'parser': None,
-            },
+                'cmd': ['ovs-appctl', 'fdb/show', 'br-int'],
+                'help': 'Collect mac data base for ovs bridge br-int',
+                'sudo': True,
+                'output': None,
+                'order': 21,
+                'parser': None,
+    },
         'ovs_appctl_fdb_show_br_tun':
             {
-            'cmd'   : ['ovs-appctl', 'fdb/show', 'br-tun'],
-            'help'  : 'Collect mac data base for ovs bridge br-tun',
-            'sudo'  : True,
-            'output': None,
-            'order' : 22,
-            'parser': None,
-            },
+                'cmd': ['ovs-appctl', 'fdb/show', 'br-tun'],
+                'help': 'Collect mac data base for ovs bridge br-tun',
+                'sudo': True,
+                'output': None,
+                'order': 22,
+                'parser': None,
+    },
         'ovs_vsctl_show':
             {
-            'cmd'   : ['ovs-vsctl', 'show'],
-            'help'  : 'Collect ovs bridge info',
-            'sudo'  : True,
-            'output': None,
-            'order' : 30,
-            'parser': ovs_vsctl_show_parser,
-            },
+                'cmd': ['ovs-vsctl', 'show'],
+                'help': 'Collect ovs bridge info',
+                'sudo': True,
+                'output': None,
+                'order': 30,
+                'parser': ovs_vsctl_show_parser,
+    },
         'ovs_ofctl_show_br_ex':
             {
-            'cmd'   : ['ovs-ofctl', 'show', 'br-ex'],
-            'help'  : 'Collect openflow information for ovs bridge br-ex',
-            'sudo'  : True,
-            'output': None,
-            'order' : 40,
-            'parser': ovs_ofctl_show_br_ex_parser,
-            },
+                'cmd': ['ovs-ofctl', 'show', 'br-ex'],
+                'help': 'Collect openflow information for ovs bridge br-ex',
+                'sudo': True,
+                'output': None,
+                'order': 40,
+                'parser': ovs_ofctl_show_br_ex_parser,
+    },
         'ovs_ofctl_show_br_int':
             {
-            'cmd'   : ['ovs-ofctl', 'show', 'br-int'],
-            'help'  : 'Collect openflow information for ovs bridge br-int',
-            'sudo'  : True,
-            'output': None,
-            'order' : 41,
-            'parser': ovs_ofctl_show_br_int_parser,
-            },
+                'cmd': ['ovs-ofctl', 'show', 'br-int'],
+                'help': 'Collect openflow information for ovs bridge br-int',
+                'sudo': True,
+                'output': None,
+                'order': 41,
+                'parser': ovs_ofctl_show_br_int_parser,
+    },
         'ovs_ofctl_show_br_tun':
             {
-            'cmd'   : ['ovs-ofctl', 'show', 'br-tun'],
-            'help'  : 'Collect openflow information for ovs bridge br-tun',
-            'sudo'  : True,
-            'output': None,
-            'order' : 42,
-            'parser': ovs_ofctl_show_br_tun_parser,
-            },
+                'cmd': ['ovs-ofctl', 'show', 'br-tun'],
+                'help': 'Collect openflow information for ovs bridge br-tun',
+                'sudo': True,
+                'output': None,
+                'order': 42,
+                'parser': ovs_ofctl_show_br_tun_parser,
+    },
         'ovs_ofctl_dump_flows_br_ex':
             {
-            'cmd'   : ['ovs-ofctl', 'dump-flows', 'br-ex'],
-            'help'  : 'Collect openflow flow table information for ovs bridge br-ex',
-            'sudo'  : True,
-            'output': None,
-            'order' : 50,
-            'parser': None,
-            },
+                'cmd': ['ovs-ofctl', 'dump-flows', 'br-ex'],
+                'help': 'Collect openflow flow table information for ovs bridge br-ex',
+                'sudo': True,
+                'output': None,
+                'order': 50,
+                'parser': None,
+    },
         'ovs_ofctl_dump_flows_br_int':
             {
-            'cmd'   : ['ovs-ofctl', 'dump-flows', 'br-int'],
-            'help'  : 'Collect openflow flow table information for ovs bridge br-int',
-            'sudo'  : True,
-            'output': None,
-            'order' : 51,
-            'parser': None,
-            },
+                'cmd': ['ovs-ofctl', 'dump-flows', 'br-int'],
+                'help': 'Collect openflow flow table information for ovs bridge br-int',
+                'sudo': True,
+                'output': None,
+                'order': 51,
+                'parser': None,
+    },
         'ovs_ofctl_dump_flows_br_tun':
             {
-            'cmd'   : ['ovs-ofctl', 'dump-flows', 'br-tun'],
-            'help'  : 'Collect openflow flow table information for ovs bridge br-tun',
-            'sudo'  : True,
-            'output': None,
-            'order' : 52,
-            'parser': None,
-            },
+                'cmd': ['ovs-ofctl', 'dump-flows', 'br-tun'],
+                'help': 'Collect openflow flow table information for ovs bridge br-tun',
+                'sudo': True,
+                'output': None,
+                'order': 52,
+                'parser': None,
+    },
         'instance_floating_ip_list':
             {
-            'cmd'   : ['nova', 'floating-ip-list'],
-            'help'  : 'Collect floating ip information for instances',
-            'env'   : True,
-            'output': None,
-            'order' : 53,
-            'parser': floating_ip_list_parser,
-            },
-            
-        }
+                'cmd': ['nova', 'floating-ip-list'],
+                'help': 'Collect floating ip information for instances',
+                'env': True,
+                'output': None,
+                'order': 53,
+                'parser': floating_ip_list_parser,
+    },
+
+}
+
 
 def check_args():
     parser = argparse.ArgumentParser(description='Runs commands, collects, and parses output',
@@ -824,36 +863,43 @@ def check_args():
     settings['debug'] = args.debug
     settings['info_file'] = args.info_file
 
-def all_commands_executed (commands):
+
+def all_commands_executed(commands):
     for cmd in commands.keys():
         if commands[cmd]['parser']:
             done = commands[cmd].get('done', False)
-            if done == False:
+            if done is False:
                 return False
     return True
 
+
 def get_vm_info_from_compute(cmd):
-    output = execute_cmd(['nova', 'hypervisor-list'], sudo=False, shell=False, env=myenv).split('\n');
+    output = execute_cmd(['nova', 'hypervisor-list'],
+                         sudo=False, shell=False, env=myenv).split('\n')
     compute_list = get_hypervisor(output)
     vm_info = []
     compute_creds = get_vm_credentials()
     for node in compute_list:
-        creds = compute_creds.get('hypervisor').get(node,compute_creds.get('hypervisor')['default'])
-        ssh = connect_to_box(node,creds['username'],creds['password'])
-        (stdin,out,err) = ssh.exec_command('sudo ' + cmd)
+        creds = compute_creds.get('hypervisor').get(
+            node, compute_creds.get('hypervisor')['default'])
+        ssh = connect_to_box(node, creds['username'], creds['password'])
+        (stdin, out, err) = ssh.exec_command('sudo ' + cmd)
         vm_info.extend(out.read().splitlines())
         ssh.close()
     return vm_info
+
 
 def exec_on_remote(cmd):
     node_details = get_vm_credentials()
     creds = node_details.get('network')
     # print "sudo "+cmd
-    ssh = connect_to_box(creds['hostname'],creds['username'],creds['password'])
-    (stdin,out,err) = ssh.exec_command(cmd)
+    ssh = connect_to_box(creds['hostname'], creds[
+                         'username'], creds['password'])
+    (stdin, out, err) = ssh.exec_command(cmd)
     if len(err.read()):
         return []
-    return out.read().splitlines()    
+    return out.read().splitlines()
+
 
 def get_hypervisor(parse_this):
     hypervisor = []
@@ -864,7 +910,7 @@ def get_hypervisor(parse_this):
         parts = [x.strip() for x in parts]
         name = parts[2]
         hypervisor.append(name)
-    return hypervisor  
+    return hypervisor
 
 
 def main():
@@ -879,7 +925,7 @@ def main():
         iteration += 1
         status_update('Iteration: ' + str(iteration))
 
-        sorted_keys = sorted(commands.items(), key = lambda (k,v) : v['order'])
+        sorted_keys = sorted(commands.items(), key=lambda (k, v): v['order'])
         for (cmd, dontcare) in sorted_keys:
             # Only collect stuff for which we have written a parser
             if commands[cmd]['parser']:
@@ -895,22 +941,25 @@ def main():
                 if deployment_type == 'multinode':
                     # handling for network node
                     if cmd.startswith('netns_'):
-                        commands[cmd]['output'] = exec_on_remote(commands[cmd]['cmd'])
+                        commands[cmd]['output'] = exec_on_remote(
+                            commands[cmd]['cmd'])
                     if cmd == 'cat_instance':
-                        commands[cmd]['output'] = get_vm_info_from_compute(commands[cmd]['cmd'])
+                        commands[cmd]['output'] = get_vm_info_from_compute(commands[
+                                                                           cmd]['cmd'])
                         print commands[cmd]['output']
                     else:
-                        commands[cmd]['output'] = execute_cmd(commands[cmd]['cmd'], sudo=sudo, shell=shell, env=env).split('\n');
+                        commands[cmd]['output'] = execute_cmd(
+                            commands[cmd]['cmd'], sudo=sudo, shell=shell, env=env).split('\n')
                 else:
-                    commands[cmd]['output'] = execute_cmd(commands[cmd]['cmd'], sudo=sudo, shell=shell, env=env).split('\n');
+                    commands[cmd]['output'] = execute_cmd(
+                        commands[cmd]['cmd'], sudo=sudo, shell=shell, env=env).split('\n')
                 commands[cmd]['parser'](commands[cmd]['output'])
                 commands[cmd]['done'] = True
 
     debug('============= COMMANDS =============')
-    #debug(pprint.pformat(commands))
+    # debug(pprint.pformat(commands))
     status_update('Writing collected info into ' + settings['info_file'])
     dump_json(info, settings['info_file'])
 
 if __name__ == "__main__":
     main()
-

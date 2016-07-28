@@ -1,32 +1,34 @@
-from django.core.urlresolvers import reverse_lazy, reverse
+from django.core.urlresolvers import reverse
 from don import api
 from don import tables as don_tables
 from horizon import tables
-from horizon.views import APIView
+# from horizon.views import APIView
 import time
 from django.conf import settings
 from django import http
+
 
 class ArchiveView(tables.DataTableView):
     template_name = 'don/archive/index.html'
     table_class = don_tables.CollectionTable
 
     def get_data(self):
-        data =  api.list_collection(self.request)
+        data = api.list_collection(self.request)
         for item in data:
             item['timestamp'] = str(time.ctime(float(item.get('timestamp'))))
         return data
 
+
 def dbview(request):
     id = request.GET.get('id')
-    data =  api.get_collection(request,id)
+    data = api.get_collection(request, id)
     pwd = settings.ROOT_PATH
     JSON_FILE = pwd + '/don/ovs/don.json'
-    don = open(JSON_FILE,'w')
+    don = open(JSON_FILE, 'w')
     don.write(str(data.data))
     don.close()
     return http.HttpResponseRedirect(
-            reverse('horizon:don:ovs:view'))
+        reverse('horizon:don:ovs:view'))
 
 '''
 class DBView(APIView):

@@ -3,30 +3,28 @@
 #
 # sudo ip netns exec qrouter-ac41aab2-f9c3-4a06-8eef-f909ee1e6e50 python # run_nms_cmd.py "command"
 #
-import sys
-import re
 import argparse
-import pprint
 import json
 from common import connect_to_box, ssh_cmd
-from common import settings, debug, error, status_update
+from common import settings
 
 
 params = {}
 
 output_dict = {
-        'comment'       : None,
-        'pass'        : None,
-        'command_list'  : [],
-        'errors'  : [],
-        }
+    'comment': None,
+    'pass': None,
+    'command_list': [],
+    'errors': [],
+}
 
-def run_nms_cmd (args):
+
+def run_nms_cmd(args):
     global output_dict
-    host_ip     = args['host_ip']
-    username    = args['username']
-    passwd      = args['passwd']
-    cmd_to_run  = args['cmd']
+    host_ip = args['host_ip']
+    username = args['username']
+    passwd = args['passwd']
+    cmd_to_run = args['cmd']
 
     result = True
     cmd_dict = {}
@@ -55,22 +53,30 @@ def run_nms_cmd (args):
     output_dict['command_list'].append(cmd_dict)
     return result
 
+
 def check_args():
     global params
 
-    parser = argparse.ArgumentParser(description='Run command from inside nms', formatter_class=argparse.ArgumentDefaultsHelpFormatter)
-    parser.add_argument('--debug', dest='debug', help='Enable debugging', default=False, action='store_true')
-    parser.add_argument('--host_ip', dest='host_ip', help='IP where the command will be run', type=str, required=True)
-    parser.add_argument('--username', dest='username', help='SSH login username (required)', type=str, required=True)
-    parser.add_argument('--passwd', dest='passwd', help='SSH login passwd (required)', type=str, required=True)
-    parser.add_argument('--cmd', dest='cmd', help='cmd to be run', type=str, required=True)
+    parser = argparse.ArgumentParser(
+        description='Run command from inside nms', formatter_class=argparse.ArgumentDefaultsHelpFormatter)
+    parser.add_argument('--debug', dest='debug',
+                        help='Enable debugging', default=False, action='store_true')
+    parser.add_argument('--host_ip', dest='host_ip',
+                        help='IP where the command will be run', type=str, required=True)
+    parser.add_argument('--username', dest='username',
+                        help='SSH login username (required)', type=str, required=True)
+    parser.add_argument('--passwd', dest='passwd',
+                        help='SSH login passwd (required)', type=str, required=True)
+    parser.add_argument('--cmd', dest='cmd',
+                        help='cmd to be run', type=str, required=True)
     args = parser.parse_args()
 
-    settings['debug']   = args.debug
-    params['host_ip']   = args.host_ip
-    params['username']  = args.username
-    params['passwd']    = args.passwd
-    params['cmd']       = args.cmd
+    settings['debug'] = args.debug
+    params['host_ip'] = args.host_ip
+    params['username'] = args.username
+    params['passwd'] = args.passwd
+    params['cmd'] = args.cmd
+
 
 def main():
     global output_dict
