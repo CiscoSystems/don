@@ -8,16 +8,18 @@ import argparse
 import sys
 import random
 
-from common import settings, debug, error, status_update, warning
-from common import dump_json, load_json, get_subnet
-from common import get_vlan_tag, get_intf_ip, get_ip_network, strip_interface
+from common import settings, debug, warning
+from common import load_json, get_subnet
+from common import get_vlan_tag, get_intf_ip, get_ip_network
+
 
 class DotGenerator:
-    def __init__ (self, in_json_filename,
-                  compute_dot_file, compute_svg_file,
-                  network_dot_file, network_svg_file,
-                  combined_dot_file, combined_svg_file,
-                  highlight_file):
+
+    def __init__(self, in_json_filename,
+                 compute_dot_file, compute_svg_file,
+                 network_dot_file, network_svg_file,
+                 combined_dot_file, combined_svg_file,
+                 highlight_file):
         self.json_filename = in_json_filename
 
         self.compute_dot_file = compute_dot_file
@@ -34,63 +36,59 @@ class DotGenerator:
         if highlight_file:
             self.highlight_info = load_json(self.highlight_file)
             if not self.highlight_info.get('net_info'):
-                self.highlight_info['net_info'] = {'pass'   : [],
-                                                   'fail'   : []
+                self.highlight_info['net_info'] = {'pass': [],
+                                                   'fail': []
                                                    }
-                                                  
 
         self.info = load_json(self.json_filename)
         self.outfile = None
 
         self.colors = {
-                'vms'       :   '#ff9933',
-                'tap'       :   '#99ffff',
-                'qbr'       :   '#9966ff',
-                'br-int'    :   '#ff6666',
-                'br-tun'    :   '#ff6666',
-                'qvb'       :   '#ffcc00',
-                'qvo'       :   '#ffcc00',
-                'tun'       :   '#ffcc00',
-                'int'       :   '#ffcc00',
-                'routers'   :   '#ff9933',
-
-                'vlan'      :   [],
-
-                'error'     :   '#f00000',
-                'edge'      :   '#0066cc',
-
-                'dontcare'  :   '#909090',
-                'pass'      :   '#b2f379',
-                'fail'      :   '#f00000',
-                'edge_pass' :   '#009900',
-                'floating_ip':  '#b3ffb3',
-                }
+            'vms': '#ff9933',
+            'tap': '#99ffff',
+            'qbr': '#9966ff',
+            'br-int': '#ff6666',
+            'br-tun': '#ff6666',
+            'qvb': '#ffcc00',
+            'qvo': '#ffcc00',
+            'tun': '#ffcc00',
+            'int': '#ffcc00',
+            'routers': '#ff9933',
+            'vlan': [],
+            'error': '#f00000',
+            'edge': '#0066cc',
+            'dontcare': '#909090',
+            'pass': '#b2f379',
+            'fail': '#f00000',
+            'edge_pass': '#009900',
+            'floating_ip': '#b3ffb3',
+        }
         self.__set_vlan_color_table()
         pprint.pprint(self.info)
 
-    def __port_pass (self, port):
+    def __port_pass(self, port):
         if self.highlight_file:
             if port.replace('.', '') == self.highlight_info['src_info']['ip'].replace('.', '') or \
                port.replace('.', '') == self.highlight_info['dst_info']['ip'].replace('.', ''):
                 return self.highlight_info['ping_pass']
             if self.highlight_info['src_info'].has_key('pass') and port in self.highlight_info['src_info']['pass'] or \
                self.highlight_info['dst_info'].has_key('pass') and port in self.highlight_info['dst_info']['pass'] or \
-               self.highlight_info['net_info'].has_key('pass') and port in self.highlight_info['net_info']['pass'] :
+               self.highlight_info['net_info'].has_key('pass') and port in self.highlight_info['net_info']['pass']:
                 return True
         return False
 
-    def __port_fail (self, port):
+    def __port_fail(self, port):
         if self.highlight_file:
             if port.replace('.', '') == self.highlight_info['src_info']['ip'].replace('.', '') or \
                port.replace('.', '') == self.highlight_info['dst_info']['ip'].replace('.', ''):
                 return not self.highlight_info['ping_pass']
             if self.highlight_info['src_info'].has_key('fail') and port in self.highlight_info['src_info']['fail'] or \
                self.highlight_info['dst_info'].has_key('fail') and port in self.highlight_info['dst_info']['fail'] or \
-               self.highlight_info['net_info'].has_key('fail') and port in self.highlight_info['net_info']['fail'] :
+               self.highlight_info['net_info'].has_key('fail') and port in self.highlight_info['net_info']['fail']:
                 return True
         return False
 
-    def __get_edge_color (self, src_tag, dst_tag):
+    def __get_edge_color(self, src_tag, dst_tag):
         if not self.highlight_file:
             return self.__get_color('edge')
 
@@ -110,9 +108,8 @@ class DotGenerator:
         sfail = self.__port_fail(sport)
         dfail = self.__port_fail(dport)
 
-
         debug('%s (p%d f%d) -> %s (p%d f%d)' % (sport, spass, sfail, dport,
-            dpass, dfail))
+                                                dpass, dfail))
 
         if spass or dpass:
             return self.colors['edge_pass']
@@ -121,22 +118,21 @@ class DotGenerator:
 
         return self.colors['dontcare']
 
-
-    def __get_color (self, tag):
+    def __get_color(self, tag):
         if self.highlight_file:
             return self.colors['dontcare']
         else:
             return self.colors[tag]
 
     def __hsv_to_rgb(self, h, s, v):
-        h_i = int((h*6))
-        f = h*6 - h_i
+        h_i = int((h * 6))
+        f = h * 6 - h_i
         p = v * (1 - s)
-        q = v * (1 - f*s)
+        q = v * (1 - f * s)
         t = v * (1 - (1 - f) * s)
 
         if h_i == 0:
-          r, g, b = v, t, p
+            r, g, b = v, t, p
         if h_i == 1:
             r, g, b = q, v, p
         if h_i == 2:
@@ -148,21 +144,21 @@ class DotGenerator:
         if h_i == 5:
             r, g, b = v, p, q
 
-        return [r*256, g*256, b*256]
+        return [r * 256, g * 256, b * 256]
 
-    def __set_vlan_color_table (self):
+    def __set_vlan_color_table(self):
         i = 20
         random.seed(1)
         while i > 0:
             colors = self.__hsv_to_rgb(random.random(), 0.5, 0.95)
-            colors = [ hex(int(x)).split('x')[1] for x in colors ]
+            colors = [hex(int(x)).split('x')[1] for x in colors]
             colors = ''.join(x for x in colors)
             self.colors['vlan'].append('#' + colors)
             i -= 1
         debug(pprint.pformat(self.colors['vlan']))
 
     # port becomes relevant only if highlight_file is specified.
-    def __get_vlan_color (self, tag, port='dummy'):
+    def __get_vlan_color(self, tag, port='dummy'):
         if self.highlight_file:
             if self.__port_pass(port):
                 return self.colors['pass']
@@ -172,9 +168,9 @@ class DotGenerator:
                 return self.colors['dontcare']
         else:
             total_colors = len(self.colors['vlan'])
-            return self.colors['vlan'][int(tag)%total_colors]
+            return self.colors['vlan'][int(tag) % total_colors]
 
-    def __get_total_vm_port_count (self):
+    def __get_total_vm_port_count(self):
         port_count = 0
         for vm in self.info['vms'].keys():
             port_count += len(self.info['vms'][vm]['src_bridge'])
@@ -182,7 +178,7 @@ class DotGenerator:
 
     # TODO XXX needs some work to handle different subnet mask length. LPM needs
     # to be implemented!
-    def __get_network_id (self, ip):
+    def __get_network_id(self, ip):
         networks = self.info['networks']
         subnet = get_subnet(ip)
 
@@ -191,11 +187,11 @@ class DotGenerator:
                 return net
         return None
 
-    def __get_network_name (self, ip):
+    def __get_network_name(self, ip):
         network_id = self.__get_network_id(ip)
         return self.info['networks'][network_id]['name']
 
-    def __get_tap_interface (self, namespace, qr_intf):
+    def __get_tap_interface(self, namespace, qr_intf):
         namespaces = self.info['namespaces']
         ip = namespaces[namespace]['interfaces'][qr_intf]
         network_id = self.__get_network_id(ip)
@@ -208,27 +204,27 @@ class DotGenerator:
             return (qdhcp, intf)
         pass
 
-    def __get_router_port_count (self, router, port_type='qr'):
+    def __get_router_port_count(self, router, port_type='qr'):
         port_count = 0
         router_id = self.info['routers'][router]['id']
         qrouter = 'qrouter-' + router_id
 
         namespaces = self.info['namespaces']
         for nms in namespaces.keys():
-            if re.search('^'+qrouter, nms):
+            if re.search('^' + qrouter, nms):
                 for intf in namespaces[nms]['interfaces'].keys():
-                    if re.search('^'+port_type, intf):
+                    if re.search('^' + port_type, intf):
                         port_count += 1
         return port_count
 
-    def __get_total_port_count (self, port_type='qr'):
+    def __get_total_port_count(self, port_type='qr'):
         port_count = 0
         for router in self.info['routers'].keys():
-            port_count += self.__get_router_port_count (router, port_type)
+            port_count += self.__get_router_port_count(router, port_type)
 
         return port_count
 
-    def __get_total_dhcp_port_count (self):
+    def __get_total_dhcp_port_count(self):
         port_count = 0
         namespaces = self.info['namespaces']
 
@@ -239,13 +235,13 @@ class DotGenerator:
                         port_count += 1
         return port_count
 
-    def __html_row_open (self):
+    def __html_row_open(self):
         print '<TR>'
 
-    def __html_row_close (self):
+    def __html_row_close(self):
         print '</TR>'
 
-    def __html_row (self, name, rspan, cspan, color, tag=None):
+    def __html_row(self, name, rspan, cspan, color, tag=None):
         # tags do not allow "-" (dash) in DOT language. Convert to "_"
         # (underscore)
         if tag:
@@ -254,7 +250,7 @@ class DotGenerator:
             print '<TD ROWSPAN="%d" COLSPAN="%d" BGCOLOR="%s">%s</TD>' % (rspan, cspan, color, name)
         pass
 
-    def __html_edge (selft, src_tag, dst_tag, color, penwidth="4", style=None):
+    def __html_edge(selft, src_tag, dst_tag, color, penwidth="4", style=None):
         src_tag = src_tag.replace('-', '_')
         dst_tag = dst_tag.replace('-', '_')
         if not style:
@@ -264,14 +260,14 @@ class DotGenerator:
                                                                     penwidth)
         else:
             print '%s:s -> %s:n [color = "%s", penwidth = "%s", style="%s"]' % (src_tag,
-                                                                    dst_tag,
-                                                                    color,
-                                                                    penwidth,
-                                                                    style)
+                                                                                dst_tag,
+                                                                                color,
+                                                                                penwidth,
+                                                                                style)
 
-    def __digraph_open (self, tag):
+    def __digraph_open(self, tag):
         msg = 'digraph DON_' + tag + ' {' + \
-'''
+            '''
 graph [fontsize=10 fontname="Helvetica"];
 node [fontsize=10 fontname="Helvetica"];
 rankdir = TB;
@@ -282,47 +278,47 @@ edge [dir=none]
 '''
         print msg
 
-    def __digraph_close (self):
+    def __digraph_close(self):
         msg = '\n}\n'
         print msg
 
-    def __cluster_name (self, tag, col_span, color="white"):
+    def __cluster_name(self, tag, col_span, color="white"):
         self.__html_row_open()
         port = tag.replace(' ', '').replace('-', '_')
         print '<TD COLSPAN="%d" BORDER="0" BGCOLOR="%s" PORT="%s">%s</TD>' % (col_span, color, port, tag)
         self.__html_row_close()
 
-    def __cluster_open_plain (self, tag, label=None):
+    def __cluster_open_plain(self, tag, label=None):
         print 'subgraph cluster_%s {' % (tag)
         print 'style=filled'
         if label:
             print 'label="%s"' % (label)
 
-    def __cluster_close_plain (self):
+    def __cluster_close_plain(self):
         print '}\n'
 
-    def __cluster_open (self, tag, color="white"):
+    def __cluster_open(self, tag, color="white"):
         print 'subgraph cluster_%s {' % (tag)
         print '%s [ shape = plaintext, label = <' % (tag)
         print '<TABLE BORDER="0" CELLBORDER="1" CELLSPACING="5" CELLPADDING="5" BGCOLOR="%s">' % (color)
         pass
 
-    def __cluster_close (self):
+    def __cluster_close(self):
         print '</TABLE>>];\n'
         print '}\n'
         pass
 
-
-    def __plot_title_edges (self, tag):
+    def __plot_title_edges(self, tag):
         if tag == 'compute':
             src_tag = 'ComputeNode'
             dst_tag = 'VMs'
         else:
             src_tag = 'NetworkNode'
             dst_tag = 'br_ex'
-        self.__html_edge(src_tag, dst_tag, self.__get_color('edge'), style="invis")
+        self.__html_edge(src_tag, dst_tag,
+                         self.__get_color('edge'), style="invis")
 
-    def __plot_vms (self):
+    def __plot_vms(self):
         col_span = self.__get_total_vm_port_count()
         row_span = 1
         self.__cluster_open('VMs')
@@ -341,10 +337,12 @@ edge [dir=none]
         self.__html_row_open()
         col_span = 1
         for vm in sorted(self.info['vms'].keys()):
-            floating_ip_info = self.info['floating_ips'].get(self.info['vms'][vm]['uuid'])
+            floating_ip_info = self.info['floating_ips'].get(
+                self.info['vms'][vm]['uuid'])
             if floating_ip_info:
                 network = floating_ip_info.get('pool')
-                self.__html_row('Floating -'+network, row_span, col_span, self.colors['floating_ip'])
+                self.__html_row('Floating -' + network, row_span,
+                                col_span, self.colors['floating_ip'])
             for bridge in sorted(self.info['vms'][vm]['src_bridge']):
                 tag = get_vlan_tag(self.info, bridge)
                 ip = get_intf_ip(self.info, bridge)
@@ -355,28 +353,29 @@ edge [dir=none]
                 self.__html_row(network, row_span, col_span, color)
         self.__html_row_close()
 
-
-
         # Plot the IPs for each port
         self.__html_row_open()
         for vm in sorted(self.info['vms'].keys()):
-            floating_ip_info = self.info['floating_ips'].get(self.info['vms'][vm]['uuid'])
+            floating_ip_info = self.info['floating_ips'].get(
+                self.info['vms'][vm]['uuid'])
             if floating_ip_info:
                 ip = floating_ip_info.get('floating_ip')
-                self.__html_row(ip, row_span, col_span, self.colors['floating_ip'],ip.replace('.', ''))
+                self.__html_row(ip, row_span, col_span, self.colors[
+                                'floating_ip'], ip.replace('.', ''))
             for bridge in sorted(self.info['vms'][vm]['src_bridge']):
                 tag = get_vlan_tag(self.info, bridge)
                 ip = get_intf_ip(self.info, bridge)
                 color = self.__get_vlan_color(tag, ip)
                 if re.search('x.x.x.x', ip):
                     color = self.__get_color('error')
-                self.__html_row(ip, row_span, col_span, color, ip.replace('.', ''))
+                self.__html_row(ip, row_span, col_span,
+                                color, ip.replace('.', ''))
         self.__html_row_close()
 
         self.__cluster_close()
         pass
 
-    def __plot_linux_bridge (self):
+    def __plot_linux_bridge(self):
         row_span = 1
         col_span = self.__get_total_vm_port_count()
         self.__cluster_open('LinuxBridge')
@@ -403,7 +402,8 @@ edge [dir=none]
             for bridge in sorted(self.info['vms'][vm]['src_bridge']):
                 if self.info['brctl'].has_key(bridge):
                     tag = get_vlan_tag(self.info, bridge)
-                    self.__html_row(bridge, row_span, col_span, self.__get_vlan_color(tag, bridge), bridge)
+                    self.__html_row(bridge, row_span, col_span,
+                                    self.__get_vlan_color(tag, bridge), bridge)
         self.__html_row_close()
 
         # Third, the qvb (one part of eth-pair) devices
@@ -421,7 +421,7 @@ edge [dir=none]
         self.__cluster_close()
         pass
 
-    def __plot_br_int_compute (self):
+    def __plot_br_int_compute(self):
         br_int = self.info['bridges']['br-int']
         row_span = 1
         col_span = self.__get_total_vm_port_count()
@@ -451,7 +451,7 @@ edge [dir=none]
                 if br_int['ports'].has_key(qvo_port):
                     tag = br_int['ports'][qvo_port]['tag']
                     self.__html_row('VLAN tag:' + tag, row_span, col_span,
-                                    self.__get_vlan_color(tag), qvo_port + 'tag_'+ tag)
+                                    self.__get_vlan_color(tag), qvo_port + 'tag_' + tag)
         self.__html_row_close()
 
         col_span = self.__get_total_vm_port_count()
@@ -461,16 +461,17 @@ edge [dir=none]
         if br_int['ports'].has_key(tun_port):
             port_id = '[' + br_int['ports'][tun_port]['id'] + '] '
             self.__html_row(port_id + tun_port, row_span, col_span,
-                    self.__get_color('tun'), tun_port)
+                            self.__get_color('tun'), tun_port)
         else:
-            self.__html_row(tun_port, row_span, col_span, self.__get_color('error'), tun_port)
+            self.__html_row(tun_port, row_span, col_span,
+                            self.__get_color('error'), tun_port)
         self.__html_row_close()
 
         self.__cluster_close()
         pass
 
     # TODO
-    def __plot_br_ex_to_br_int (self):
+    def __plot_br_ex_to_br_int(self):
         namespaces = self.info['namespaces']
 
         for nms in namespaces.keys():
@@ -483,16 +484,17 @@ edge [dir=none]
             for intf in namespaces[nms]['interfaces'].keys():
                 if re.search('^qg-', intf):
                     qg_intf = intf
-                    break;
+                    break
 
             for intf in namespaces[nms]['interfaces'].keys():
                 if re.search('^qr-', intf):
                     src_tag = 'br_ex:' + qg_intf
                     dst_tag = 'network_br_int:' + intf
-                    self.__html_edge(src_tag, dst_tag, self.__get_color('edge'))
+                    self.__html_edge(src_tag, dst_tag,
+                                     self.__get_color('edge'))
         pass
 
-    def __plot_br_ex_network (self):
+    def __plot_br_ex_network(self):
         routers = self.info['routers']
         namespaces = self.info['namespaces']
         br_ex = self.info['bridges']['br-ex']
@@ -507,7 +509,8 @@ edge [dir=none]
         self.__html_row_open()
         for router in sorted(routers.keys()):
             col_span = self.__get_router_port_count(router, port_type='qg')
-            self.__html_row(router, row_span, col_span, self.__get_color('routers'), router)
+            self.__html_row(router, row_span, col_span,
+                            self.__get_color('routers'), router)
         self.__html_row_close()
 
         # Display the ips for each qg port
@@ -516,12 +519,12 @@ edge [dir=none]
             col_span = self.__get_router_port_count(router, port_type='qg')
             qrouter = 'qrouter-' + routers[router]['id']
             for nms in namespaces.keys():
-                if re.search('^'+qrouter, nms):
+                if re.search('^' + qrouter, nms):
                     for intf in namespaces[nms]['interfaces'].keys():
                         if re.search('^qg-', intf):
                             ip = namespaces[nms]['interfaces'][intf]
                             self.__html_row(ip, row_span, col_span,
-                                    self.__get_color('routers'), ip)
+                                            self.__get_color('routers'), ip)
         self.__html_row_close()
 
         # For each router, print the qg- interfaces
@@ -530,25 +533,25 @@ edge [dir=none]
             col_span = self.__get_router_port_count(router, port_type='qg')
             qrouter = 'qrouter-' + routers[router]['id']
             for nms in namespaces.keys():
-                if re.search('^'+qrouter, nms):
+                if re.search('^' + qrouter, nms):
                     for intf in namespaces[nms]['interfaces'].keys():
                         if re.search('^qg-', intf):
                             port_id = '[' + br_ex['ports'][intf]['id'] + '] '
                             self.__html_row(port_id + intf, row_span, col_span,
-                                    self.__get_color('routers'), intf)
+                                            self.__get_color('routers'), intf)
         self.__html_row_close()
 
         self.__cluster_close()
 
-    def __plot_br_int_network (self):
+    def __plot_br_int_network(self):
         routers = self.info['routers']
         namespaces = self.info['namespaces']
         br_int = self.info['bridges']['br-int']
 
         row_span = 1
-        #max_col_span = self.__get_total_port_count(port_type='qr') + \
+        # max_col_span = self.__get_total_port_count(port_type='qr') + \
         #           self.__get_total_dhcp_port_count()
-        max_col_span = self.__get_total_port_count(port_type='qr')*2
+        max_col_span = self.__get_total_port_count(port_type='qr') * 2
         col_span = max_col_span
 
         self.__cluster_open('network_br_int')
@@ -561,54 +564,55 @@ edge [dir=none]
         for router in sorted(routers.keys()):
             qrouter = 'qrouter-' + routers[router]['id']
             for nms in namespaces.keys():
-                if re.search('^'+qrouter, nms):
+                if re.search('^' + qrouter, nms):
                     for intf in namespaces[nms]['interfaces'].keys():
                         if re.search('^qr-', intf):
                             tag = br_int['ports'][intf]['tag']
                             port_id = '[' + br_int['ports'][intf]['id'] + '] '
                             color = self.__get_vlan_color(tag, intf)
-                            self.__html_row(port_id + intf, row_span, col_span, color, intf)
+                            self.__html_row(
+                                port_id + intf, row_span, col_span, color, intf)
                             # now plot the corresponding tap interface
                             (tap_nms, tap) = self.__get_tap_interface(nms, intf)
                             tag = br_int['ports'][tap]['tag']
                             color = self.__get_vlan_color(tag, tap)
                             port_id = '[' + br_int['ports'][tap]['id'] + '] '
-                            self.__html_row(port_id + tap, row_span, col_span, color, tap)
+                            self.__html_row(
+                                port_id + tap, row_span, col_span, color, tap)
 
                             a = {
-                                    'qr_intf'   : intf,
-                                    'tap_intf'  : tap,
-                                    'qr_ip'     : namespaces[nms]['interfaces'][intf],
-                                    'tap_ip'    : namespaces[tap_nms]['interfaces'][tap],
-                                }
+                                'qr_intf': intf,
+                                'tap_intf': tap,
+                                'qr_ip': namespaces[nms]['interfaces'][intf],
+                                'tap_ip': namespaces[tap_nms]['interfaces'][tap],
+                            }
                             temp_info.append(a)
         self.__html_row_close()
-
 
         # The vlan tags for each of the qr- and tap ports
         col_span = 1
         self.__html_row_open()
         for entry in temp_info:
-            qr_intf     = entry['qr_intf']
-            tap_intf    = entry['tap_intf']
+            qr_intf = entry['qr_intf']
+            tap_intf = entry['tap_intf']
 
             tag = br_int['ports'][qr_intf]['tag']
             self.__html_row('VLAN tag:' + tag, row_span, col_span,
-                            self.__get_vlan_color(tag), qr_intf + 'tag_'+ tag)
+                            self.__get_vlan_color(tag), qr_intf + 'tag_' + tag)
 
             tag = br_int['ports'][tap_intf]['tag']
             self.__html_row('VLAN tag:' + tag, row_span, col_span,
-                            self.__get_vlan_color(tag), tap_intf + 'tag_'+ tag)
+                            self.__get_vlan_color(tag), tap_intf + 'tag_' + tag)
 
         self.__html_row_close()
 
         # Display the ips with each of the qr- and tap ports
         self.__html_row_open()
         for entry in temp_info:
-            qr_intf     = entry['qr_intf']
-            qr_ip       = entry['qr_ip']
-            tap_intf    = entry['tap_intf']
-            tap_ip      = entry['tap_ip']
+            qr_intf = entry['qr_intf']
+            qr_ip = entry['qr_ip']
+            tap_intf = entry['tap_intf']
+            tap_ip = entry['tap_ip']
 
             tag = br_int['ports'][qr_intf]['tag']
             self.__html_row(qr_ip, row_span, col_span,
@@ -636,26 +640,27 @@ edge [dir=none]
         self.__html_row_open()
         for router in sorted(self.info['routers'].keys()):
             # For each qr port that is also a tap port (for dhcp)
-            col_span = self.__get_router_port_count(router, port_type='qr')*2
+            col_span = self.__get_router_port_count(router, port_type='qr') * 2
             self.__html_row(router, row_span, col_span,
-                    self.__get_color('routers'), router)
+                            self.__get_color('routers'), router)
         self.__html_row_close()
 
         # Display the patch-tun port
         self.__html_row_open()
         tun_port = 'patch-tun'
-        debug ('max_col_span 2: ' + str(max_col_span))
+        debug('max_col_span 2: ' + str(max_col_span))
         if br_int['ports'].has_key(tun_port):
             port_id = '[' + br_int['ports'][tun_port]['id'] + '] '
             self.__html_row(port_id + tun_port, row_span, max_col_span,
-                self.__get_color('tun'), tun_port)
+                            self.__get_color('tun'), tun_port)
         else:
-            self.__html_row(tun_port, row_span, max_col_span, self.__get_color('error'), tun_port)
+            self.__html_row(tun_port, row_span, max_col_span,
+                            self.__get_color('error'), tun_port)
         self.__html_row_close()
 
         self.__cluster_close()
 
-    def __plot_br_tun (self, tag):
+    def __plot_br_tun(self, tag):
         br_tun = self.info['bridges']['br-tun']
         row_span = 1
         col_span = self.__get_total_vm_port_count()
@@ -668,14 +673,16 @@ edge [dir=none]
         int_port = 'patch-int'
         if br_tun['ports'].has_key(int_port):
             port_id = '[' + br_tun['ports'][int_port]['id'] + '] '
-            self.__html_row(port_id + int_port, row_span, col_span, self.__get_color('int'), int_port)
+            self.__html_row(port_id + int_port, row_span,
+                            col_span, self.__get_color('int'), int_port)
         else:
-            self.__html_row(int_port, row_span, col_span, self.__get_color('error'), int_port)
+            self.__html_row(int_port, row_span, col_span,
+                            self.__get_color('error'), int_port)
         self.__html_row_close()
 
         self.__cluster_close()
 
-    def __plot_vms_to_linuxbridge (self):
+    def __plot_vms_to_linuxbridge(self):
         brctl = self.info['brctl']
         for vm in sorted(self.info['vms'].keys()):
             for bridge in sorted(self.info['vms'][vm]['src_bridge']):
@@ -690,7 +697,7 @@ edge [dir=none]
                             break
         pass
 
-    def __plot_linuxbridge_to_br_int (self):
+    def __plot_linuxbridge_to_br_int(self):
         brctl = self.info['brctl']
         br_int = self.info['bridges']['br-int']
 
@@ -708,25 +715,28 @@ edge [dir=none]
                             break
         pass
 
-    def __plot_br_int_to_br_tun (self, tag):
+    def __plot_br_int_to_br_tun(self, tag):
         br_int = self.info['bridges']['br-int']['ports']
         br_tun = self.info['bridges']['br-tun']['ports']
 
         tun_port = 'patch-tun'
         int_port = 'patch-int'
         if br_int.has_key(tun_port) and br_tun.has_key(int_port):
-            tun_peer = br_int[tun_port]['interfaces'][tun_port].get('options', None)
-            int_peer = br_tun[int_port]['interfaces'][int_port].get('options', None)
+            tun_peer = br_int[tun_port]['interfaces'][
+                tun_port].get('options', None)
+            int_peer = br_tun[int_port]['interfaces'][
+                int_port].get('options', None)
             if tun_peer and int_peer:
-                if re.search('peer='+int_port, tun_peer) and \
-                   re.search('peer='+tun_port, int_peer):
+                if re.search('peer=' + int_port, tun_peer) and \
+                   re.search('peer=' + tun_port, int_peer):
                     src_tag = tag + '_br_int:' + tun_port
                     dst_tag = tag + '_br_tun:' + int_port
-                    self.__html_edge(src_tag, dst_tag, self.__get_color('edge'))
+                    self.__html_edge(src_tag, dst_tag,
+                                     self.__get_color('edge'))
                     return
         pass
 
-    def plot_combined (self):
+    def plot_combined(self):
         self.outfile = open(self.combined_dot_file, 'w')
         sys.stdout = self.outfile
 
@@ -746,7 +756,7 @@ edge [dir=none]
         self.outfile.close()
         sys.stdout = sys.__stdout__
 
-    def plot_compute_node (self):
+    def plot_compute_node(self):
         tag = 'compute'
         redirected = False
         if sys.stdout == sys.__stdout__:
@@ -782,13 +792,14 @@ edge [dir=none]
             self.outfile.close()
             sys.stdout = sys.__stdout__
 
-    def generate_compute_svg (self):
-        cmd = ['/usr/bin/dot', '-Tsvg', self.compute_dot_file, '-o', self.compute_svg_file]
+    def generate_compute_svg(self):
+        cmd = ['/usr/bin/dot', '-Tsvg', self.compute_dot_file,
+               '-o', self.compute_svg_file]
         debug(pprint.pformat(cmd))
         subprocess.call(cmd)
         debug('Done generating compute SVG')
 
-    def plot_network_node (self):
+    def plot_network_node(self):
         tag = 'network'
         redirected = False
         if sys.stdout == sys.__stdout__:
@@ -818,29 +829,36 @@ edge [dir=none]
             self.outfile.close()
             sys.stdout = sys.__stdout__
 
-    def generate_network_svg (self):
-        cmd = ['/usr/bin/dot', '-Tsvg', self.network_dot_file, '-o', self.network_svg_file]
+    def generate_network_svg(self):
+        cmd = ['/usr/bin/dot', '-Tsvg', self.network_dot_file,
+               '-o', self.network_svg_file]
         debug(pprint.pformat(cmd))
         subprocess.call(cmd)
         debug('Done generating network SVG')
 
-    def generate_combined_svg (self):
-        cmd = ['/usr/bin/dot', '-Tsvg', self.combined_dot_file, '-o', self.combined_svg_file]
+    def generate_combined_svg(self):
+        cmd = ['/usr/bin/dot', '-Tsvg', self.combined_dot_file,
+               '-o', self.combined_svg_file]
         debug(pprint.pformat(cmd))
         subprocess.call(cmd)
         debug('Done generating network SVG')
-
 
 
 def check_args():
     parser = argparse.ArgumentParser(description='Plot the compute node network internals',
                                      formatter_class=argparse.ArgumentDefaultsHelpFormatter)
-    parser.add_argument('--debug', dest='debug', help='Enable debugging', default=True, action='store_true')
-    parser.add_argument('--info_file', dest='info_file', help='Info is read  in JSON format in this file', default="don.json", type=str)
-    parser.add_argument('--compute_file', dest='compute_file', help='[compute_file].dot and [compute_file].svg will be generated for compute node', default="compute", type=str)
-    parser.add_argument('--network_file', dest='network_file', help='[network_file].dot and [network_file].svg will be generated for network node', default="network", type=str)
-    parser.add_argument('--combined_file', dest='combined_file', help='[combined_file].dot and [combined_file].svg will be generated', default="don", type=str)
-    parser.add_argument('--highlight_file', dest='highlight_file', help='pass and fail node are specified in this file', default=None, type=str)
+    parser.add_argument('--debug', dest='debug',
+                        help='Enable debugging', default=True, action='store_true')
+    parser.add_argument('--info_file', dest='info_file',
+                        help='Info is read  in JSON format in this file', default="don.json", type=str)
+    parser.add_argument('--compute_file', dest='compute_file',
+                        help='[compute_file].dot and [compute_file].svg will be generated for compute node', default="compute", type=str)
+    parser.add_argument('--network_file', dest='network_file',
+                        help='[network_file].dot and [network_file].svg will be generated for network node', default="network", type=str)
+    parser.add_argument('--combined_file', dest='combined_file',
+                        help='[combined_file].dot and [combined_file].svg will be generated', default="don", type=str)
+    parser.add_argument('--highlight_file', dest='highlight_file',
+                        help='pass and fail node are specified in this file', default=None, type=str)
 
     args = parser.parse_args()
 
@@ -853,6 +871,7 @@ def check_args():
     settings['combined_dot_file'] = args.combined_file + '.dot'
     settings['combined_svg_file'] = args.combined_file + '.svg'
     settings['highlight_file'] = args.highlight_file
+
 
 def main():
     check_args()
@@ -877,4 +896,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-

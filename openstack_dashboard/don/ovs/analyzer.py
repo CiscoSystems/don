@@ -14,14 +14,15 @@ import json
 import os
 from itertools import combinations
 
-from common import settings, debug, error, status_update, get_router
-from common import dump_json, load_json, get_subnet, is_network_public
+from common import settings, debug, get_router
+from common import load_json, get_subnet, is_network_public
 import yaml
 
-tick    = '&#10004;'
-cross   = '&#10008;'
+tick = '&#10004;'
+cross = '&#10008;'
 
-def get_vm_qrouters (info, vm):
+
+def get_vm_qrouters(info, vm):
     vms = info['vms']
     if not vms.has_key(vm):
         return 'unknown'
@@ -45,7 +46,9 @@ def get_vm_qrouters (info, vm):
 
 # Even if there is one qrouter namespace via which all ping tests passed, we
 # consider the ping test to be a success.
-def did_ping_test_pass (cmds):
+
+
+def did_ping_test_pass(cmds):
     qrouter_result = True
     for qrouter in sorted(cmds.keys()):
         debug('Checking ping status in qrouter %s' % qrouter)
@@ -57,7 +60,7 @@ def did_ping_test_pass (cmds):
                 result = cmds[qrouter][key][key2]['pass']
                 if not result:
                     qrouter_result = False
-                    break # check the next namsepace, this one failed
+                    break  # check the next namsepace, this one failed
         # if all ping passed via this qrouter, return true
         if qrouter_result:
             return qrouter_result
@@ -65,29 +68,34 @@ def did_ping_test_pass (cmds):
     # There was no qrouter via which all pings passed!
     return qrouter_result
 
-def run_ping_command (cmd, comment=''):
+
+def run_ping_command(cmd, comment=''):
     debug('Running ' + comment + ': ' + cmd)
     return subprocess.check_output(cmd,
-                    shell=True,
-                    stderr=subprocess.STDOUT,
-                    universal_newlines=True).replace('\t', '    ')
+                                   shell=True,
+                                   stderr=subprocess.STDOUT,
+                                   universal_newlines=True).replace('\t', '    ')
 
 
 def report_file_open(report_file):
     f = open(report_file, 'w')
     f.write('<html>\n')
     f.write('<head>\n')
-    f.write('<script type="text/javascript" src="{{ STATIC_URL }}/don/CollapsibleLists.js"></script>\n')
-    f.write('<link rel="stylesheet" type="text/css" href="{{ STATIC_URL }}/don/don.css">\n')
+    f.write(
+        '<script type="text/javascript" src="{{ STATIC_URL }}/don/CollapsibleLists.js"></script>\n')
+    f.write(
+        '<link rel="stylesheet" type="text/css" href="{{ STATIC_URL }}/don/don.css">\n')
     f.write('<title>DON: Analysis Results</title>\n')
     f.write('</head>\n')
     f.write('<body onload=CollapsibleLists.apply()>\n')
 
     return f
 
+
 def report_file_close(file_handle):
     file_handle.write('</body>\n')
     file_handle.write('</html>\n')
+
 
 def print_ping_result(cmds, overall_result, info, comment=None):
     lines = []
@@ -109,7 +117,8 @@ def print_ping_result(cmds, overall_result, info, comment=None):
                 result_str = '<font class="fail">%s</font>' % cross
                 if result:
                     result_str = '<font class="pass">%s</font>' % tick
-                lines.append('      <li>%15s &rarr; %15s    %s\n' % (src_ip, dst_ip, result_str))
+                lines.append('      <li>%15s &rarr; %15s    %s\n' %
+                             (src_ip, dst_ip, result_str))
                 lines.append('      <ul class="collapsibleList">\n')
                 if result:
                     lines.append('        <pre class="pass">\n')
@@ -132,15 +141,17 @@ def print_ping_result(cmds, overall_result, info, comment=None):
     lines.append('OVERALL RESULT: %s\n' % overall_str)
     return lines
 
+
 def get_vm_credentials(config_file='credentials.yaml'):
     try:
-        with open(config_file,'r') as s:
+        with open(config_file, 'r') as s:
             return yaml.safe_load(s)
-    except IOError,e:
-        print '%s :%s'%(e.args[1],config_file)
+    except IOError, e:
+        print '%s :%s' % (e.args[1], config_file)
         raise
 
-def test_ping (info):
+
+def test_ping(info):
     debug('Running ping test')
     vms = info['vms']
     vm_credentials = get_vm_credentials()
@@ -162,39 +173,45 @@ def test_ping (info):
                 for dst_ip in vms[dst_vm]['interfaces'].keys():
                     if is_network_public(dst_ip, dst_vm, info):
                         continue
-                    username = vm_credentials.get(src_vm, vm_credentials['default'])['username']
-                    passwd = vm_credentials.get(src_vm, vm_credentials['default'])['password']
+                    username = vm_credentials.get(
+                        src_vm, vm_credentials['default'])['username']
+                    passwd = vm_credentials.get(src_vm, vm_credentials[
+                                                'default'])['password']
                     cmd = 'sudo ip netns exec ' + qrouter
                     cmd += ' python ping.py --src_ip %s --dst_ip %s --username "%s" --passwd "%s" --count %d --timeout %d' % \
-                            (src_ip, dst_ip, username, passwd, 1, 2)
+                        (src_ip, dst_ip, username, passwd, 1, 2)
 
-                    comment = 'Ping [%s (%s) => %s (%s)]' % (src_vm, src_ip, dst_vm, dst_ip)
-                    output  = run_ping_command(cmd, comment=comment)
+                    comment = 'Ping [%s (%s) => %s (%s)]' % (
+                        src_vm, src_ip, dst_vm, dst_ip)
+                    output = run_ping_command(cmd, comment=comment)
                     a = json.loads(output)
                     success = a['pass']
                     cmds[qrouter][(src_vm, dst_vm)][(src_ip, dst_ip)] = {
-                            'cmd'       : cmd,
-                            'output'    : output,
-                            'pass'      : success
-                            }
+                        'cmd': cmd,
+                        'output': output,
+                        'pass': success
+                    }
 
     debug(pprint.pformat(cmds))
     ping_test_passed = did_ping_test_pass(cmds)
 
     return (ping_test_passed, cmds)
 
-def run_ovs_command (cmd, comment=''):
+
+def run_ovs_command(cmd, comment=''):
     debug('Running ' + comment + ': ' + cmd)
     return subprocess.check_output(cmd,
-                    shell=True,
-                    stderr=subprocess.STDOUT,
-                    universal_newlines=True).replace('\t', '    ')
+                                   shell=True,
+                                   stderr=subprocess.STDOUT,
+                                   universal_newlines=True).replace('\t', '    ')
 
-def process_ovs_output (output):
+
+def process_ovs_output(output):
     for line in output:
         if re.search('PASS', line):
             return True
     return False
+
 
 def print_ovs_result(cmds, overall_result, info, comment=None):
     lines = []
@@ -213,7 +230,8 @@ def print_ovs_result(cmds, overall_result, info, comment=None):
             result_str = '<font class="fail">%s</font>' % cross
             if result:
                 result_str = '<font class="pass">%s</font>' % tick
-            lines.append('      <li>%3s &rarr; %3s    %s\n' % (src_port, dst_port, result_str))
+            lines.append('      <li>%3s &rarr; %3s    %s\n' %
+                         (src_port, dst_port, result_str))
             lines.append('      <ul class="collapsibleList">\n')
             if result:
                 lines.append('        <pre class="pass">\n')
@@ -236,7 +254,8 @@ def print_ovs_result(cmds, overall_result, info, comment=None):
     lines.append('OVERALL RESULT: %s\n' % overall_str)
     return lines
 
-def test_ovs (info):
+
+def test_ovs(info):
     debug('Running OVS test')
     ovs_test_passed = True
     cmds = {}
@@ -255,14 +274,15 @@ def test_ovs (info):
         tag_to_port[tag].append((port_id, port))
 
     debug(pprint.pformat(tag_to_port))
-    for tag in sorted(tag_to_port.keys(), key=lambda x:int(x)):
+    for tag in sorted(tag_to_port.keys(), key=lambda x: int(x)):
         cmds[tag] = {}
         port_count = len(tag_to_port[tag])
         if port_count < 2:
-            debug('tag %s is used by single port %s. Skipping test!' % (tag, tag_to_port[tag][0]))
+            debug('tag %s is used by single port %s. Skipping test!' %
+                  (tag, tag_to_port[tag][0]))
             continue
 
-        port_list = list(map(lambda (x,y): x, tag_to_port[tag]))
+        port_list = list(map(lambda (x, y): x, tag_to_port[tag]))
         sorted_port_list = sorted(port_list, key=lambda x: int(x))
         port_pairs = list(combinations(sorted_port_list, 2))
 
@@ -271,48 +291,48 @@ def test_ovs (info):
 
             cmd = ''
             cmd += 'python ovs.py --src_port_id %s --dst_port_id %s --tag %s --ovs_bridge br-int' % \
-                    (src_port, dst_port, tag)
+                (src_port, dst_port, tag)
             comment = 'ovs [tag: %s port %s => %s' % (tag, src_port, dst_port)
-            output  = run_ovs_command(cmd, comment=comment)
+            output = run_ovs_command(cmd, comment=comment)
             success = process_ovs_output(output)
             if not success:
                 ovs_test_passed = False
 
             cmds[tag][(src_port, dst_port)] = {
-                    'cmd'       : cmd,
-                    'output'    : output,
-                    'pass'      : success
-                    }
+                'cmd': cmd,
+                'output': output,
+                'pass': success
+            }
 
     return (ovs_test_passed, cmds)
 
 
 # Dictionary of tests
-test_suite  = {
-        'ping': {
-            'help'          : 'Ping test between all pairs of VMs',
-            'func'          : test_ping,
-            'result'        : 'not run',
-            'formatter'     : print_ping_result,
-            'html'          : None,
-            },
-        'ovs': {
-            'help'          : 'OVS test between all pairs of ports using the same tag in br-int',
-            'func'          : test_ovs,
-            'result'        : 'not run',
-            'formatter'     : print_ovs_result,
-            'html'          : None,
-            },
-        }
+test_suite = {
+    'ping': {
+        'help': 'Ping test between all pairs of VMs',
+        'func': test_ping,
+        'result': 'not run',
+        'formatter': print_ping_result,
+        'html': None,
+    },
+    'ovs': {
+        'help': 'OVS test between all pairs of ports using the same tag in br-int',
+        'func': test_ovs,
+        'result': 'not run',
+        'formatter': print_ovs_result,
+        'html': None,
+    },
+}
 
-def analyze (json_filename, params):
-    settings['debug']               = True
+
+def analyze(json_filename, params):
+    settings['debug'] = True
     BASE_DIR = os.path.dirname(os.path.dirname(__file__))
-    print 'analyze BASE_DIR ---> ',BASE_DIR
     CUR_DIR = os.getcwd()
     os.chdir(BASE_DIR + '/ovs')
-    NEW_DIR = os.getcwd()
-    #return BASE_DIR + ':' + CUR_DIR + ':' + NEW_DIR
+    # NEW_DIR = os.getcwd()
+    # return BASE_DIR + ':' + CUR_DIR + ':' + NEW_DIR
     debug('This is what I am going to analyze')
     my_info = load_json(json_filename)
 
@@ -339,29 +359,49 @@ def analyze (json_filename, params):
     report_file_close(f)
     os.chdir(CUR_DIR)
 
+
 def check_args():
     parser = argparse.ArgumentParser(description='Static analysis of output of commands',
                                      formatter_class=argparse.ArgumentDefaultsHelpFormatter)
-    parser.add_argument('--debug', dest='debug', help='Enable debugging', default=True, action='store_true')
-    parser.add_argument('--info_file', dest='info_file', help='Info is read  in JSON format in this file', default="don.json", type=str)
-    parser.add_argument('--ping', dest='ping', help='ping test between all VMs', default=False, action='store_true')
-    parser.add_argument('--ping_count', dest='ping_count', help='how many ping packets to send', default=2, type=int)
-    parser.add_argument('--ping_timeout', dest='ping_timeout', help='ping timeout period in seconds', default=2, type=int)
-    parser.add_argument('--ovs', dest='ovs', help='ovs test between ports using same tag in br-int', default=False, action='store_true')
-    parser.add_argument('--test_all', dest='test_all', help='Perform all tests in test suite', default=False, action='store_true')
-    parser.add_argument('--error_file', dest='error_file', help='All errors will be reported to this file', type=str, default='don.error.txt')
-    parser.add_argument('--report_file', dest='report_file', help='Report will be written in this file in HTML format', type=str, default='don.report.html')
+    parser.add_argument('--debug', dest='debug',
+                        help='Enable debugging',
+                        default=True, action='store_true')
+    parser.add_argument('--info_file', dest='info_file',
+                        help='Info is read  in JSON format in this file',
+                        default="don.json", type=str)
+    parser.add_argument('--ping', dest='ping',
+                        help='ping test between all VMs', default=False,
+                        action='store_true')
+    parser.add_argument('--ping_count', dest='ping_count',
+                        help='how many ping packets to send',
+                        default=2, type=int)
+    parser.add_argument('--ping_timeout', dest='ping_timeout',
+                        help='ping timeout period in seconds',
+                        default=2, type=int)
+    parser.add_argument('--ovs', dest='ovs',
+                        help='ovs test between ports using same tag in br-int',
+                        default=False, action='store_true')
+    parser.add_argument('--test_all', dest='test_all',
+                        help='Perform all tests in test suite',
+                        default=False, action='store_true')
+    parser.add_argument('--error_file', dest='error_file',
+                        help='All errors will be reported to this file',
+                        type=str, default='don.error.txt')
+    parser.add_argument('--report_file', dest='report_file',
+                        help='Report will be written in this file in HTML format',
+                        type=str, default='don.report.html')
     args = parser.parse_args()
 
-    settings['debug']               = args.debug
-    settings['info_file']           = args.info_file
-    settings['error_file']          = args.error_file
-    settings['test:all']            = args.test_all
-    settings['test:ping']           = args.test_all or args.ping
-    settings['test:ping_count']     = args.ping_count
-    settings['test:ping_timeout']   = args.ping_timeout
-    settings['test:ovs']            = args.test_all or args.ovs
-    settings['test:report_file']    = args.report_file
+    settings['debug'] = args.debug
+    settings['info_file'] = args.info_file
+    settings['error_file'] = args.error_file
+    settings['test:all'] = args.test_all
+    settings['test:ping'] = args.test_all or args.ping
+    settings['test:ping_count'] = args.ping_count
+    settings['test:ping_timeout'] = args.ping_timeout
+    settings['test:ovs'] = args.test_all or args.ovs
+    settings['test:report_file'] = args.report_file
+
 
 def main():
     check_args()
